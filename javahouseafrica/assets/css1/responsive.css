@@ -1,0 +1,315 @@
+@media (max-width: 767px) {
+    #wrapper {
+        padding: 70px 0 84px;
+    }
+    #wrapper .custom-header {
+        padding: 18px 0;
+    }
+    .heading-wrap {
+        padding: 0 40px;
+    }
+    .heading-wrap h2 {
+        line-height: 34px;
+        font-size: 21px;
+    }
+    .heading-wrap .icon a {
+        width: 34px;
+        height: 34px;
+    }
+    .heading-wrap .icon.close-icon a:before {
+        width: 18px;
+        height: 2px;
+    }
+    .heading-wrap .icon.close-icon a:after {
+        height: 18px;
+        width: 2px;
+    }
+    #wrapper .custom-footer {
+        padding: 18px 0 25px;
+    }
+    .custom-footer .icon-menu a {
+        width: 40px;
+        height: 40px;
+    }
+    .custom-footer .icon-menu a svg {
+        max-width: 28px;
+        max-height: 28px;
+    }
+    .box {
+        padding: 15px 25px;
+    }
+    .box h2 {
+        font-size: 17px;
+        margin: 0 0 8px;
+    }
+    .date {
+        font-size: 12px;
+    }
+    .box h2 span.date {
+        margin-top: 3px;
+    }
+    .box h3 {
+        font-size: 17px;
+    }
+    .label-box {
+        line-height: 20px;
+        font-size: 12px;
+    }
+    .label-box span {
+        font-size: 17px;
+        padding-left: 8px;
+        line-height: 18px;
+    }
+    .notification-wrap .notification-head {
+        padding: 15px 70px 15px 20px;
+    }
+    .notification-head .close-icon {
+        right: 20px;
+    }
+    .notification-head > ul li a {
+        font-size: 13px;
+    }
+    .notification-check label > span {
+        padding: 15px 70px 15px 55px;
+        line-height: 22px;
+        font-size: 15px;
+    }
+    .notification-check label > span:before {
+        left: 20px;
+    }
+    .notification-check label > span:after {
+        left: 26px;
+    }
+    .notification-check label > span .date {
+        right: 20px;
+    }
+    .notification-wrap {
+        padding-top: 101px;
+    }
+    .notification-check {
+        margin: 10px 0 0;
+    }
+    .heading-wrap .icon.back-icon a:before {
+        width: 12px;
+        height: 12px;
+        border-left: 2px solid #fff;
+        border-top: 2px solid #fff;
+    }
+    .box.purchuase-box h2 {
+        font-size: 20px;
+        margin: 0 0 16px;
+    }
+    hr.hr-space {
+        margin: 0 0 25px;
+    }
+    .purchuase-box p {
+        font-size: 15px;
+        margin: 0 0 10px;
+    }
+    .box.purchuase-box h3 {
+        font-size: 17px;
+    }
+    .cart-box .item {
+        padding: 10px 25px;
+    }
+    .my-cart .cart-box .item {
+        padding: 10px 15px;
+    }
+    .cart-box .item .img {
+        width: 50px;
+        margin-right: 15px;
+    }
+    .cart-box .item h3 {
+        font-size: 17px;
+        margin: 0 0 8px;
+    }
+    .cart-box .item p {
+        font-size: 15px;
+        margin: 0 0 3px;
+    }
+    .cart-box .item .kes {
+        font-size: 15px;
+    }
+    button.submit-btn {
+        width: 100%;
+    }
+    .msg-box {
+        width: 320px;
+    }
+    .msg-box h2 {
+        font-size: 17px;
+    }
+    .msg-box p {
+        font-size: 15px;
+    }
+    .msg-box .text {
+        padding: 30px 20px;
+    }
+    .msg-box .msg-btn {
+        line-height: 42px;
+        font-size: 17px;
+    }
+    .transition-box .label-box span {
+        min-width: 40px;
+    }
+    p {
+        margin-bottom: 0.6rem;
+    }
+    .select-location-body .box h2 {
+        font-size: 17px;
+    }
+    #wrapper .custom-body.order-type-body,
+    #wrapper .custom-body.payment-body {
+        padding: 0 20px;
+    }
+    .order-type-body .accordion .card-body {
+        padding: 15px 15px;
+    }
+    .order-type-body .accordion-header .btn .icon {
+        margin-left: 15px;
+    }
+    .order-type-body .accordion-header .btn {
+        padding-left: 68px;
+        font-size: 17px;
+    }
+    .m_payment_total {
+        font-size: 17px;
+        padding: 15px 20px;
+        line-height: 30px;
+    }
+    .payment-body .accordion-header .btn {
+        padding: 10px 50px 10px 20px;
+        font-size: 14px;
+    }
+
+    .payment-body .accordion-header .btn:before {
+        right: 22px;
+        width: 14px;
+        height: 14px;
+        border-right: 2px solid #7E746B;
+        border-bottom: 2px solid #7E746B;
+    }
+    .payment-body .accordion .card-body {
+        padding: 0 20px 20px;
+    }
+    h4.point-count {
+        font-size: 12px;
+    }
+    .point-field button {
+        font-size: 14px;
+    }
+    .lipa-wrap {
+        padding: 15px 20px;
+    }
+    .lipa-wrap .buy-good h3 {
+        font-size: 17px;
+    }
+    .lipa-img {
+        max-width: 50%;
+    }
+    .lipa-wrap .buy-good {
+        padding: 5px 14px;
+    }
+    .checkout-total {
+        border-radius: 5px;
+        margin: 50px 0 15px;
+        line-height: 30px;
+    }
+    .select-location-body .notification-body {
+        padding: 0 20px;
+    }
+    .proceed-btn-wrap {
+        padding: 90px 20px 20px;
+    }
+    .select-location-body .nav {
+        padding: 9px 20px;
+    }
+    .select-location-body .nav .nav-item a {
+        display: block;
+        min-width: 0;
+    }
+    .select-location-body .nav .nav-item {
+        padding: 0 5px;
+    }
+    .menu-body .nav-head {
+        padding: 30px 20px;
+    }
+    .menu-body .border-top-shap:after,
+    .menu-body .border-top-shap:before {
+        top: -6.7px;
+    }
+    .menu-body .nav .nav-item {
+        margin-right: 15px;
+    }
+    #wrapper .custom-body.menu-body {
+        padding: 165px 20px 10px;
+    }
+    .menu-box {
+        margin: 0 0 10px;
+        padding: 12px 15px;
+    }
+    .menu-box h2 {
+        font-size: 15px;
+    }
+    .menu-box h3 {
+        font-size: 15px;
+    }
+    .add_extra_btn {
+        font-size: 10px;
+        line-height: 22px;
+        padding: 0 8px;
+    }
+    .menu-box .img {
+        width: 70px;
+    }
+    .prodinput {
+        width: 72px;
+    }
+#wrapper .custom-body.menu-smoothies-body {
+    padding: 0 20px;
+}
+.menu-smoothies-body .accordion > .item > .accordion-header > button.btn {
+    font-size: 17px;
+}
+.menu-smoothies-body .accordion .border-shap-top {
+    margin: 8px 15px;
+}
+.menu-smoothies-body .accordion .border-shap-bottom {
+    margin: 8px 15px;
+}
+.menu-smoothies-body .accordion > .item > .accordion-header > button.btn:before {
+    width: 13px;
+    height: 13px;
+    right:22px;
+}
+.menu-smoothies-body .sub-accordion > .item > .accordion-header > button.btn {
+    font-size: 17px;
+    padding: 10px 40px 10px 20px;
+}
+.menu-smoothies-body .sub-accordion > .item > .accordion-header > button.btn:before {
+    right: 22px;
+    width: 13px;
+    height: 13px;
+}
+.menu-smoothies-body .sub-accordion > .item .card-body {
+    padding: 20px;
+}
+.smoothies-item h4 {
+    font-size: 15px;
+    margin: 0 0 6px;
+    text-transform: uppercase;
+}
+.smoothies-item p {
+    font-size: 12px;
+}
+.smoothies-item .smoothies-price {
+    font-size: 15px;
+    right:31px;
+}
+.smoothies-item {
+    padding-right: 82px;
+    margin-bottom: 22px;
+}
+
+
+}

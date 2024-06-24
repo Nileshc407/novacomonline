@@ -1,0 +1,1859 @@
+<?php 
+class Igain_model extends CI_Model
+{
+
+//**************** Ravi work start ***********************************	
+	/* function FetchCompany()
+	{
+		$company_sql = $this->db->query("Select * from igain_company_master");
+		$company_result = $company_sql->result_array();
+		
+		if($company_sql->num_rows() > 0)
+		{
+			return $company_result;
+		}
+		else
+		{
+			return 0;
+		}
+		
+	} */
+	function Fetch_Company_Details($Company)
+	{
+		 $this->db->select('*');
+		$this->db->from('igain_company_master');
+		$this->db->where(array('Activated' => '1','Company_id' => $Company));
+		// echo $this->db->last_query();
+		$sql = $this->db->get();	
+		
+		
+		
+		$company_result = $sql->result_array();		
+		if($sql->num_rows() > 0)
+		{
+			return $company_result;
+		}
+		else
+		{
+			return 0;
+		}
+		
+	}	
+	function FetchUserType()
+	{
+		$UserType_sql = $this->db->query("Select * from igain_user_type_master");
+		$UserType_result = $UserType_sql->result_array();
+		
+		if($UserType_sql->num_rows() > 0)
+		{
+			return $UserType_result;
+		}
+		else
+		{
+			return 0;
+		}
+		
+	}	
+	function FetchCountry()
+	{
+		$Country_sql = $this->db->query("Select * from igain_country_timezone_tbl");
+		return $Country_result = $Country_sql->result_array();
+		
+	}
+	 function get_country($Company_id)
+	 {
+		$query = "Select Country from  igain_company_master where Company_id='".$Company_id."' ";
+				
+				$sql = $this->db->query($query);
+				foreach ($sql->result() as $row)
+				{
+					$Country_id = $row->Country;
+				}
+		return 	$Country_id;	
+	 }	 
+	 function get_dial_code($Country_id)
+	 {
+		/* $query = "select Dial_code from igain_currency_master where Country_id='".$Country_id."'";
+
+				$sql = $this->db->query($query);
+				foreach ($sql->result() as $row)
+				{
+					$dial_code = $row->Dial_code;
+				}
+		return 	$dial_code;	 */
+		
+		$query =  $this->db->select('Dial_code')
+				   ->from('igain_currency_master')
+				   ->where(array('Country_id' => $Country_id))->get();
+				   if($query->num_rows() > 0)
+				   {
+						return $query->row();
+				   }
+				   else
+				   {
+						return false;
+				   }
+		
+			
+	 }
+	function get_partner_companys($Loggin_User_id,$Company_id)
+	{
+		if($Loggin_User_id == 3)
+		{
+			$fetch_query = "SELECT Company_id,Company_name from  igain_company_master where Partner_company_flag=1 AND Activated=1";	
+		}
+		else
+		{
+			$fetch_query = "SELECT Company_id,Company_name from  igain_company_master where Parent_company='".$Company_id."' AND Activated=1 AND Company_id!=1";	
+		}
+		
+		$run_sql = $this->db->query($fetch_query);
+		
+		if($run_sql->num_rows() > 0)
+		{
+			return $run_sql->result_array();
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	
+	function get_partner_clients($CompanyID)
+	{
+		$partner_clients_query = "SELECT Company_id,Company_name from  igain_company_master where Parent_company=".$CompanyID." AND Activated=1";
+				
+		$sql_result = $this->db->query($partner_clients_query);
+
+		if($sql_result->num_rows() > 0)
+		{
+			return $sql_result->result_array();
+		}
+		else
+		{
+			return 0;
+		}
+	}	
+	function FetchSellerdetails($Company_id)
+	{
+		$this->db->select("*");
+		$this->db->from('igain_enrollment_master');
+		$this->db->where(array('User_id' => '2','User_activated' => '1','Super_seller' => '0','Sub_seller_admin' => '1','Sub_seller_Enrollement_id' => '0','Company_id' => $Company_id));
+		$this->db->order_by('Enrollement_id', 'DESC');
+		$SubsellerSql = $this->db->get();	
+		// echo $this->db->last_query();
+		return $SubsellerSql->result_array(); 
+	}
+	function FetchSellerdetails_report($Company_id)
+	{
+		$this->db->select("*");
+		$this->db->from('igain_enrollment_master');
+		$this->db->where(array('User_id' => '2','User_activated' => '1','Company_id' => $Company_id));
+		$this->db->order_by('Enrollement_id', 'DESC');
+		$this->db->limit('4');
+		$SubsellerSql = $this->db->get();	
+		return $SubsellerSql->result_array();
+		
+	}
+	function Fetch_Super_Seller_details($Company_id)
+	{
+		
+		$this->db->select("*");
+		$this->db->from('igain_enrollment_master');
+		$this->db->where(array('User_id' => '2','Super_seller ' => '1','User_activated' => '1','Company_id' => $Company_id));
+		// echo $this->db->last_query();
+		$sql = $this->db->get();		
+		if($sql -> num_rows() == 1)
+		{
+			return $sql->row();
+		}
+		else
+		{
+			return false;
+		}
+		
+	}
+	function Fetch_All_Merchants($Company_id)
+	{
+		$this->db->select("*");
+		$this->db->from('igain_enrollment_master');
+		$this->db->where(array('User_id' => '2','Super_seller !=' => '1','User_activated' => '1','Company_id' => $Company_id));
+		$this->db->order_by('Enrollement_id', 'DESC');
+		$SubsellerSql = $this->db->get();		
+		return $SubsellerSql->result_array();
+		
+	}
+	function FetchCompanySeller($Company_id)
+	{
+		$this->db->select("Enrollement_id");
+		$this->db->from('igain_enrollment_master');
+		$this->db->where(array('User_id' => '2','User_activated' => '1','Company_id' => $Company_id));
+		$SubsellerSql = $this->db->get();		
+		return $SubsellerSql->result_array();
+		
+	}
+	public function Company_Seller_Count($Enrollement_id,$Company_id)
+	{
+		$this->db->select('*');
+		$this->db->from('igain_enrollment_master');
+		$this->db->where(array('Company_id' => $Company_id,'User_activated' => '1'));
+		return $this->db->count_all_results();
+	}
+	function Fetch_Company_Seller($limit,$start,$Company_id)
+	{
+		$this->db->select("Enrollement_id");
+		$this->db->from('igain_enrollment_master');
+		$this->db->where(array('User_id' => '2','User_activated' => '1','Company_id' => $Company_id));
+		$this->db->limit($limit,$start);
+		$SubsellerSql = $this->db->get();		
+		return $SubsellerSql->result_array();
+		
+	} 
+	function FetchSellerOffers($seller_id,$Company_id,$enroll)
+	{
+		/*  $this->db->select("*");
+		$this->db->from('igain_seller_communication');
+		$this->db->where(array('igain_seller_communication.seller_id' => $seller_id,'igain_enrollment_master.User_activated' => '1','igain_seller_communication.activate' => 'yes'));
+		$this->db->join('igain_enrollment_master', 'igain_seller_communication.seller_id = igain_enrollment_master.Enrollement_id');
+		$this->db->order_by('igain_seller_communication.id', 'DESC');
+		$this->db->limit('1');
+		$SubsellerSql = $this->db->get();	 
+		
+		return $SubsellerSql->result_array(); */
+		
+		
+		$this->db->select("*");
+		$this->db->from('igain_cust_notification');
+		$this->db->where(array('igain_cust_notification.seller_id' => $seller_id,'igain_cust_notification.Customer_id' =>$enroll ));
+		$this->db->join('igain_seller_communication', 'igain_cust_notification.Communication_id = igain_seller_communication.Id');
+		$this->db->join('igain_enrollment_master', 'igain_cust_notification.seller_id = igain_enrollment_master.Enrollement_id');
+		$this->db->order_by('igain_cust_notification.Id', 'DESC');
+		$this->db->limit('1');
+		$SubsellerSql = $this->db->get();
+			
+		//echo $this->db->last_query();
+		
+		return $SubsellerSql->result_array(); 
+		
+	}
+	 function Fetch_Seller_Loyalty_Offers($seller_id)
+	{
+		$this->db->select(" * ");
+		$this->db->from('igain_loyalty_master');
+		$this->db->where(array('Seller' => $seller_id));
+		$this->db->join('igain_enrollment_master', 'igain_loyalty_master.Seller = igain_enrollment_master.Enrollement_id');
+		$this->db->order_by('igain_loyalty_master.Loyalty_id', 'DESC');
+		$this->db->limit('1');
+		$SubsellerSql = $this->db->get();	
+		
+		return $SubsellerSql->result_array();
+		
+	} 
+	function getRandomString($length = 4) 
+	{
+		$characters = '0123456789';
+		$string = '';
+		for ($i = 0; $i < $length; $i++) 
+		{
+			$string .= $characters[mt_rand(0, strlen($characters) - 1)];
+		}
+		return $string;
+	}
+	
+	function get_company_details($CompanyId)
+	{
+		$this->db->select("*");
+		$this->db->from('igain_company_master');
+		$this->db->where(array('Activated' => '1','Company_id' => $CompanyId));
+		
+		$sql = $this->db->get();
+		if($sql -> num_rows() == 1)
+		{
+			return $sql->row();
+			// return $sql->result_array();
+		}
+		else
+		{
+			return false;
+		}
+	}	
+	function get_enrollment_details($Enrollement_id)
+	{
+		$this->db->select("*,(Current_balance-Blocked_points) AS Total_balance");
+		$this->db->from('igain_enrollment_master');
+		$this->db->where('Enrollement_id', $Enrollement_id);
+		
+		$sql = $this->db->get();
+		
+		if($sql -> num_rows() == 1)
+		{
+			return $sql->row();
+		}
+		else
+		{
+			return false;
+		}
+	}
+	function get_customer_details($MembershipID,$Company_id)
+	{
+		$this->db->select("First_name,Last_name");
+		$this->db->from('igain_enrollment_master');
+		$this->db->where('Card_id', $MembershipID,'Company_id', $Company_id);
+		
+		$sql = $this->db->get();
+		
+		if($sql -> num_rows() == 1)
+		{
+			return $sql->row();
+		}
+		else
+		{
+			return false;
+		}
+	}		
+	function get_all_customers($Company_id)
+	{
+		$this->db->select("Enrollement_id,User_email_id");
+		$this->db->where(array('User_id' => '1','User_activated' => '1','Company_id' => $Company_id));
+		$this->db->where('Card_id <>','0');	
+		$query = $this->db->get('igain_enrollment_master');
+		 // echo $this->db->last_query();
+		return $query->result_array();
+	}
+	function FetchTransactionDetails($Enrollement_id,$Card_id)
+	{
+		$this->db->select("*");
+		
+		$this->db->where(array('Card_id' => $Card_id,'Enrollement_id' => $Enrollement_id));
+		$this->db->join('igain_transaction_type', 'igain_transaction.Trans_type = igain_transaction_type.Trans_type_id');
+		$this->db->order_by('igain_transaction.Trans_id', 'DESC');
+		$this->db->limit('5');
+		$query = $this->db->get('igain_transaction');
+		return $query->result_array();
+	}
+	public function Open_Notification_Count($Enrollement_id,$Company_id)
+	{
+		$this->db->select('*');
+		$this->db->from('igain_cust_notification');
+		$this->db->where(array('Customer_id' => $Enrollement_id,'Company_id' => $Company_id,'Open_flag' => '0'));
+		return $this->db->count_all_results();
+	}
+	public function Read_Notification_Count($Enrollement_id,$Company_id)
+	{
+		$this->db->select('*');
+		$this->db->from('igain_cust_notification');
+		$this->db->where(array('Customer_id' => $Enrollement_id,'Company_id' => $Company_id,'Open_flag' => '1'));
+		return $this->db->count_all_results();
+	}
+	public function Read_Unread_Notification_Count($Enrollement_id,$Company_id)
+	{
+		$this->db->select('*');
+		$this->db->from('igain_cust_notification');
+		$this->db->where(array('Customer_id' => $Enrollement_id,'Company_id' => $Company_id));
+		return $this->db->count_all_results();
+	}
+	
+	public function Fetch_customer_notifications($Enrollement_id,$Company_id)
+	{
+		$this->db->distinct();
+		$this->db->select('Communication_id');
+		$this->db->from('igain_cust_notification');
+		$this->db->where(array('Customer_id' => $Enrollement_id,'Company_id' => $Company_id));
+		$this->db->order_by('Id', 'DESC');
+		$this->db->limit('5');
+		$sql = $this->db->get();
+		// echo $this->db->last_query();
+
+		if($sql -> num_rows() > 1)
+		{
+			return $sql->result_array();
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	function Fetch_Merchant_offers($seller_id,$Communication_id)
+	{
+		$this->db->select('A.First_name,A.Last_name,B.communication_plan,B.description,A.Current_address,A.Phone_no,A.Enrollement_id,A.Company_id');
+		$this->db->from('igain_seller_communication as B');
+		$this->db->join('igain_enrollment_master as A', 'B.seller_id = A.Enrollement_id');	
+		$this->db->where(array('B.seller_id' => $seller_id,'A.User_activated' => '1','B.activate' => 'yes','B.id' => $Communication_id));
+		$sql = $this->db->get();	
+		
+		// echo "Query for Seller------".$seller_id."----and Communication id-------".$Communication_id."---------------".$this->db->last_query()."<br>";
+		
+		return $sql->result_array();		
+	}
+	
+	function Fetch_Merchant_offers2($seller_id,$Communication_id)
+	{
+		$this->db->select("communication_plan,description");
+		$this->db->where(array('seller_id' => $seller_id));
+		$this->db->where_in('id', $Communication_id);
+		$this->db->order_by('id','DESC');
+		$query = $this->db->get('igain_seller_communication');
+		// echo $this->db->last_query();
+		return $query->result_array();		
+	}
+	
+	function Fetch_Open_Notification_Count($Enrollement_id,$Company_id)
+	{
+		$this->db->select("*,COUNT(*) AS Open_notify");
+		$this->db->where(array('Customer_id' => $Enrollement_id,'Company_id' => $Company_id,'Open_flag' => '0','Active_flag' => '1'));
+		$query = $this->db->get('igain_cust_notification');
+		if($query -> num_rows() == 1)
+		{
+			return $query->row();
+		}
+		else
+		{
+			return false;
+		}
+	}
+	function Fetch_Read_Notification_Count($Enrollement_id,$Company_id)
+	{
+		$this->db->select("*,COUNT(*) AS Read_noty");
+		$this->db->where(array('Customer_id' => $Enrollement_id,'Company_id' => $Company_id,'Open_flag' => '1','Active_flag' => '1'));
+		$query = $this->db->get('igain_cust_notification');
+		if($query -> num_rows() == 1)
+		{
+			return $query->row();
+		}
+		else
+		{
+			return false;
+		}
+	}
+	function Fetch_All_Notification_Count($Enrollement_id,$Company_id)
+	{
+		$this->db->select("*,COUNT(*) AS All_noty");
+		$this->db->where(array('Customer_id' => $Enrollement_id,'Company_id' => $Company_id,'Active_flag' => '1'));
+		$query = $this->db->get('igain_cust_notification');
+		if($query -> num_rows() == 1)
+		{
+			return $query->row();
+		}
+		else
+		{
+			return false;
+		}
+	}
+	function FetchNotificationDetails($Enrollement_id,$Company_id)
+	{
+		$this->db->select("*");
+		$this->db->where(array('Customer_id' => $Enrollement_id,'Company_id' => $Company_id,'Open_flag' => '0','Active_flag' => '1'));		
+		$this->db->order_by('igain_cust_notification.id', 'DESC');
+		$this->db->limit('5');
+		$query = $this->db->get('igain_cust_notification');
+		return $query->result_array();
+	}
+	function Fetch_Open_Notification_Details($limit,$start,$Enrollement_id,$Company_id)
+	{
+		$this->db->select('igain_cust_notification.Id,igain_cust_notification.Seller_id,igain_cust_notification.Customer_id,igain_cust_notification.User_email_id,igain_cust_notification.Communication_id,igain_cust_notification.Offer,igain_cust_notification.Offer_description,igain_cust_notification.Open_flag,igain_cust_notification.Date,igain_enrollment_master.Enrollement_id,igain_enrollment_master.First_name,igain_enrollment_master.Middle_name,igain_enrollment_master.Last_name,igain_company_master.Company_name');
+		$this->db->from('igain_cust_notification');
+		$this->db->join('igain_enrollment_master', 'igain_cust_notification.Seller_id = igain_enrollment_master.Enrollement_id');
+		$this->db->join('igain_company_master','igain_cust_notification.Company_id = igain_company_master.Company_id');
+		$this->db->where(array('igain_cust_notification.Customer_id' => $Enrollement_id,'igain_cust_notification.Company_id' => $Company_id,'igain_cust_notification.Open_flag' => '0','igain_cust_notification.Active_flag' => '1'));
+		$this->db->limit($limit,$start);
+		$this->db->order_by('igain_cust_notification.id','DESC');
+		$query = $this->db->get();
+		return $query->result_array();
+	}
+	function Fetch_Read_Notifications_Details($limit,$start,$Enrollement_id,$Company_id)
+	{
+		$this->db->select('igain_cust_notification.Id,igain_cust_notification.Seller_id,igain_cust_notification.Customer_id,igain_cust_notification.User_email_id,igain_cust_notification.Communication_id,igain_cust_notification.Offer,igain_cust_notification.Offer_description,igain_cust_notification.Open_flag,igain_cust_notification.Date,igain_enrollment_master.Enrollement_id,igain_enrollment_master.First_name,igain_enrollment_master.Middle_name,igain_enrollment_master.Last_name,igain_company_master.Company_name');
+		$this->db->from('igain_cust_notification');
+		$this->db->join('igain_enrollment_master','igain_cust_notification.Seller_id = igain_enrollment_master.Enrollement_id');
+		$this->db->join('igain_company_master','igain_cust_notification.Company_id = igain_company_master.Company_id');
+		$this->db->where(array('igain_cust_notification.Customer_id' => $Enrollement_id,'igain_cust_notification.Company_id' => $Company_id,'igain_cust_notification.Open_flag' => '1','igain_cust_notification.Active_flag' => '1'));
+		$this->db->limit($limit,$start);
+		$this->db->order_by('igain_cust_notification.id','DESC');
+		
+		$query = $this->db->get();
+		return $query->result_array();
+	}
+	function Fetch_All_Read_NotificationDetails($limit,$start,$Enrollement_id,$Company_id)
+	{
+		$this->db->select('igain_cust_notification.Id,igain_cust_notification.Seller_id,igain_cust_notification.Customer_id,igain_cust_notification.User_email_id,igain_cust_notification.Communication_id,igain_cust_notification.Offer,igain_cust_notification.Offer_description,igain_cust_notification.Open_flag,igain_cust_notification.Date,igain_enrollment_master.Enrollement_id,igain_enrollment_master.First_name,igain_enrollment_master.Middle_name,igain_enrollment_master.Last_name,igain_company_master.Company_name');
+		$this->db->from('igain_cust_notification');
+		$this->db->join('igain_enrollment_master', 'igain_cust_notification.Seller_id = igain_enrollment_master.Enrollement_id');
+		$this->db->join('igain_company_master','igain_cust_notification.Company_id = igain_company_master.Company_id');
+		$this->db->where(array('igain_cust_notification.Customer_id' => $Enrollement_id,'igain_cust_notification.Company_id' => $Company_id,'igain_cust_notification.Active_flag' => '1'));
+		$this->db->limit($limit,$start);
+		$this->db->order_by('igain_cust_notification.id','DESC');
+		$query = $this->db->get();
+		return $query->result_array();
+	}	
+	function FetchMerchandiseProduct($Company_id)
+	{
+		$this->db->select("*");
+		$this->db->where(array('Company_id' => $Company_id));
+		$this->db->order_by('igain_company_merchandise_catalogue.Company_merchandise_item_id', 'DESC');
+		$this->db->limit('5');
+		$Merchandise = $this->db->get('igain_company_merchandise_catalogue');		
+		return $Merchandise->result_array();
+		
+	}
+	function Fetch_Merchandise_Product_Category($Company_id)
+	{
+		
+		$this->db->select("*");
+		$this->db->order_by('Merchandize_category_name', 'ASC');
+		$query = $this->db->get('igain_merchandize_category');
+		return $query->result_array();
+		
+	}
+	public function update_profile($post_data,$Enrollement_id)
+	{
+		$this->db->trans_start();
+		$this->db->where('Enrollement_id', $Enrollement_id);
+		$this->db->update('igain_enrollment_master', $post_data);
+		$this->db->trans_complete();
+		if ($this->db->affected_rows() == '1') {
+			return TRUE;
+		} else {
+			if ($this->db->trans_status() === FALSE) {
+				return false;
+			}
+			return true;
+		}
+		
+	}
+	public function update_promocode($post_data,$promo_code,$Company_id,$Enrollment_id,$Current_balance,$membership_id,$lv_date_time)
+	{
+		
+		$Promocode_Details=$this->Igain_model->get_promocode_details($promo_code,$Company_id);
+		$Promo_code=$Promocode_Details->Promo_code;					
+		$PromocodePoints=$Promocode_Details->Points;					
+		$Total_Current_Balance=$Current_balance + $PromocodePoints;
+		
+		$Enrollment_Details=$this->Igain_model->get_enrollment_details($Enrollment_id);
+		$Topup_amt=$Enrollment_Details->Total_topup_amt;
+		$Total_Topup_Amount=$Topup_amt+$PromocodePoints;
+		
+		$this->db->where(array('Company_id' => $Company_id,'Promo_code'=>$promo_code,'Promo_code_status	' => '0','Active_flag	' => '1'));
+		$this->db->update('igain_promo_campaign_child', $post_data); 
+		if($this->db->affected_rows() > 0)
+		{			
+			
+			$data['Company_id'] = $Company_id;			
+			$data['Trans_type'] = '7';
+			$data['Topup_amount'] = $PromocodePoints;			
+			// $data['Loyalty_pts'] = $PromocodePoints;			
+			$data['Trans_date'] = $lv_date_time;			
+			$data['Enrollement_id'] = $Enrollment_id;			
+			$data['Card_id'] = $membership_id;
+			$data['Remarks'] = 'Promo Code Points';			
+			$data['remark2'] = 'PromoCode Transaction-('.$promo_code.')';			
+			$this->db->insert('igain_transaction', $data);			
+			
+			$data1=array('Current_balance' => $Total_Current_Balance,'Total_topup_amt' => $Total_Topup_Amount );
+			$this->db->where(array('Company_id' => $Company_id,'Enrollement_id' => $Enrollment_id));
+			$this->db->update('igain_enrollment_master',$data1);	
+			if($this->db->affected_rows() > 0)
+			{ 
+				return true;
+			}
+		
+		}
+	}
+		
+	function get_promocode_details($promo_code,$Company_id)
+	{
+		$today=date('Y-m-d');
+		
+		$this->db->select(" PC.*,PM.From_date,PM.From_date,PM.To_date ");
+		$this->db->from('igain_promo_campaign_child AS PC');
+		$this->db->where(array('PC.Company_id' => $Company_id,'PC.Promo_code'=>$promo_code,'PC.Promo_code_status' => '0','PC.Active_flag' => '1'));
+		$this->db->where(" '".$today."' BETWEEN PM.From_date AND PM.To_date ");
+		$this->db->join('igain_promo_campaign AS PM', 'PC.Campaign_id = PM.Campaign_id');
+		$sql = $this->db->get();
+		// echo $this->db->last_query();
+		if($sql -> num_rows() == 1)
+		{
+			return $sql->row();
+		}
+		else
+		{
+			return false;
+		}
+	}
+	function get_super_seller_details($Company_id)
+	{
+		$this->db->select("*");
+		$this->db->from('igain_enrollment_master');
+		$this->db->where(array('Company_id' => $Company_id,'Super_seller'=>'1','User_id	' => '2','User_activated' => '1'));
+		
+		$sql = $this->db->get();
+		if($sql -> num_rows() == 1)
+		{
+			return $sql->row();
+		}
+		else
+		{
+			return false;
+		}
+	}
+	function FetchCompanyAuction($Company_id,$today)
+	{
+		$this->db->select(" * ");		
+		$this->db->where(array('Company_id' => $Company_id,'Active_flag' =>'1'));	
+		$this->db->where("'".$today."' BETWEEN From_date AND To_date");
+		
+		$this->db->order_by('Auction_id', 'DESC');
+		$query = $this->db->get('igain_auction_master');
+		$query->result_array();
+		$sql_result = $query->result_array();
+		 
+		
+		
+		return $query->result_array();
+	}
+	
+	function get_auction_details($Auction_id)
+	{
+		$this->db->select("*");
+		$this->db->from('igain_auction_master');
+		$this->db->where('Auction_id', $Auction_id);
+		
+		$sql = $this->db->get();
+		if($sql -> num_rows() == 1)
+		{
+			return $sql->row();
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	function FetchAuctionBidder($Auction_id,$Company_id)
+	{
+		$this->db->select("COUNT(Enrollement_id) as TotalBid");
+		$this->db->where(array('Company_id' => $Company_id,'Auction_id' => $Auction_id,'igain_auction_winner.Winner_flag' => 0,'igain_auction_winner.Active_flag' => 0));		
+		$query = $this->db->get('igain_auction_winner');
+		return $query->result_array();
+	}
+	
+	function FetchMerchantOffers($Company_id)
+	{
+		$this->db->select("igain_loyalty_master.Loyalty_name");
+		
+		$this->db->where(array('igain_loyalty_master.Company_id' => $Company_id));
+		$this->db->join('igain_enrollment_master', 'igain_loyalty_master.Seller = igain_enrollment_master.Enrollement_id');
+		$this->db->order_by('igain_loyalty_master.Loyalty_id', 'DESC');
+		$query = $this->db->get('igain_loyalty_master');
+		return $query->result_array();
+		
+	}
+	function Fetch_Merchant_Loyalty_Offers($Enrollment_id,$Company_id)
+	{
+		$today=date('Y-m-d');
+		$this->db->select("a.* , b.Tier_name");
+		$this->db->from('igain_loyalty_master as a');
+		$this->db->join('igain_tier_master as b', 'a.Tier_id = b.Tier_id','LEFT');
+		$this->db->where(array('a.Company_id' => $Company_id,'a.Seller' => $Enrollment_id,'a.Active_flag' => '1'));
+		$this->db->where(" '".$today."' BETWEEN From_date AND Till_date ");
+		$this->db->order_by('a.Loyalty_id','DESC');
+		$queryMe = $this->db->get();	
+		
+		return $queryMe->result_array(); 
+		
+	}
+	function FetchMerchantCommunicationDetails($Enrollment_id)
+	{
+		 $this->db->select("*");
+		$this->db->where(array('seller_id' => $Enrollment_id));
+		$this->db->order_by('id','DESC');
+		$query = $this->db->get('igain_seller_communication');
+		
+		return $query->result_array(); 
+		
+	}
+	
+	function FetchNotifications($Notify)
+	{
+		$this->db->select("*");
+		$this->db->where(array('id' => $Notify));
+		$this->db->join('igain_company_master', 'igain_cust_notification.Company_id	 = igain_company_master.Company_id');
+		$query = $this->db->get('igain_cust_notification');
+		if($query -> num_rows() == 1)
+		{
+			return $query->row();
+		}
+		else
+		{
+			return false;
+		}
+		
+	}
+	public function Update_Notification($post_data,$Note_id)
+	{
+		$this->db->where('Id', $Note_id);
+		$this->db->update('igain_cust_notification', $post_data); 
+		
+		if($this->db->affected_rows() > 0)
+		{
+			return true;
+		}  
+	}
+	
+	public function delete_notification($NoteId)
+	{
+		/* $this->db->where('Id', $NoteId);
+		$this->db->delete('igain_cust_notification');
+		if($this->db->affected_rows() > 0)
+		{
+			return true;
+		}  */
+		
+		
+		 $data = array(
+					'Active_flag' => 0
+				);
+		$this->db->where(array('Id' => $NoteId));
+		$this->db->update("igain_cust_notification", $data);
+		// echo $this->db->last_query();
+		if($this->db->affected_rows() > 0)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		} 
+		
+	}
+	
+	function Fetch_TransactionTypes_details()
+	{
+		 $this->db->select("*");
+		 $this->db->where_not_in('Trans_type_id ','5');
+		 $this->db->where_not_in('Trans_type_id ','6');
+		$query = $this->db->get('igain_transaction_type');
+		return $query->result_array(); 
+		
+	}
+	function Fetch_Transaction_Detail_Reports($Company_id,$startDate,$endDate,$Merchant,$Trans_Type,$Report_type,$Enrollment_id,$membership_id,$Redeemption_report,$start,$limit)
+	{
+	
+		
+		$startDate=date('Y-m-d',strtotime($startDate));
+		$endDate=date('Y-m-d',strtotime($endDate));
+		
+			
+		/*  
+			echo "----Company_id-----".$Company_id."--<br>";
+			echo "----startDate-----".$startDate."--<br>";
+			echo "----endDate-----".$endDate."--<br>";
+			echo "----Merchant-----".$Merchant."--<br>";
+			echo "----Trans_Type-----".$Trans_Type."--<br>";
+			echo "----Report_type-----".$Report_type."--<br>";
+			echo "----Enrollment_id-----".$Enrollment_id."--<br>";
+			echo "----membership_id-----".$membership_id."--<br>"; 
+			echo "----Redeemption_report-----".$Redeemption_report."--<br>"; 
+		// die;  
+		 */
+		 
+		if($Redeemption_report==1)
+		{
+			if($Report_type=='0')
+			{
+					$this->db->select("igain_transaction_type.Trans_type AS TransactionType,igain_transaction.Trans_date AS TransactionDate,SUM(igain_transaction.Quantity) AS TotalQuantity,SUM(igain_transaction.Redeem_points * igain_transaction.Quantity) AS TotalItemRedeemPoints ,igain_transaction.Voucher_no AS VoucherNo,igain_transaction.Voucher_status AS VoucherStatus,igain_transaction.Item_code AS Item,Merchandize_item_name AS ItemName");
+					$this->db->from('igain_transaction');
+					$this->db->where('igain_transaction.Trans_date >=', $startDate);
+					$this->db->where('igain_transaction.Trans_date <=', $endDate);
+					$this->db->where('igain_transaction.Company_id ', $Company_id);
+					$this->db->where('igain_transaction.Trans_type=10 ');
+					$this->db->where('igain_transaction.Enrollement_id ', $Enrollment_id);
+					$this->db->where('igain_transaction.Card_id ', $membership_id);
+					$this->db->join('igain_transaction_type', 'igain_transaction.Trans_type = igain_transaction_type.Trans_type_id');
+					$this->db->join('igain_company_merchandise_catalogue', 'igain_transaction.Item_code = igain_company_merchandise_catalogue.Company_merchandize_item_code');
+					$this->db->order_by('igain_transaction.Trans_id', 'DESC');
+					$this->db->order_by('igain_transaction.Trans_date', 'DESC');
+					// $this->db->group_by('igain_transaction.Item_code');					
+					$this->db->group_by('igain_transaction.Voucher_no');
+					$this->db->limit($limit,$start);					
+					$query = $this->db->get();
+					if ($query->num_rows() > 0)
+					{
+						
+						foreach ($query->result() as $row)
+						{
+							if($row->TransactionType=="" ){$row->TransactionType='-';}else{ $row->TransactionType=$row->TransactionType;}									
+							if($row->TransactionDate=="" ){$row->TransactionDate='-';}else{ $row->TransactionDate=$row->TransactionDate;}
+							if($row->TotalQuantity==0 ){$row->TotalQuantity='-';}else{ $row->TotalQuantity=$row->TotalQuantity;}
+							if($row->TotalItemRedeemPoints==0 ){$row->TotalItemRedeemPoints='-';}else{$row->TotalItemRedeemPoints=$row->TotalItemRedeemPoints;}								
+							if($row->VoucherNo=="" ){$row->VoucherNo='-';}else{ $row->VoucherNo=$row->VoucherNo;}
+							if($row->VoucherStatus!="" ){ $row->VoucherStatus=$row->VoucherStatus; }else { $row->VoucherStatus='-';}
+							if($row->Item=="" ){$row->Item='-';}else{ $row->Item=$row->Item;}
+							if($row->Remarks=="" ){$row->Remarks='-';}else{ $row->Remarks=$row->Remarks;}
+							if($row->ItemName=="" ){$row->ItemName='-';}else{ $row->ItemName=$row->ItemName;}
+							
+							$data[] = $row;
+							
+						}
+						return $data;
+					}
+					
+					
+				
+			}
+			else
+			{
+				// echo "----Redeemption_report-----".$Redeemption_report."--<br>"; 
+					$this->db->select("igain_transaction_type.Trans_type  AS TransactionType,SUM(igain_transaction.Redeem_points * igain_transaction.Quantity) AS TotalItemRedeemPoints,SUM(igain_transaction.Quantity) AS TotalQuantity");
+					$this->db->from('igain_transaction');
+					$this->db->where('igain_transaction.Trans_date >=', $startDate);
+					$this->db->where('igain_transaction.Trans_date <=', $endDate);
+					$this->db->where('igain_transaction.Company_id ', $Company_id);
+					$this->db->where('igain_transaction.Trans_type=10 ');
+					$this->db->where('igain_transaction.Enrollement_id ', $Enrollment_id);
+					$this->db->where('igain_transaction.Card_id ', $membership_id);
+					$this->db->join('igain_transaction_type', 'igain_transaction.Trans_type = igain_transaction_type.Trans_type_id');
+					$this->db->limit($limit,$start);
+					$query = $this->db->get();					
+					if ($query->num_rows() > 0)
+					{
+						
+						foreach ($query->result() as $row)
+						{
+							if($row->TransactionType=="" ){$row->TransactionType='-';}else{ $row->TransactionType=$row->TransactionType;}					
+							if($row->TotalItemRedeemPoints=="" ){$row->TotalItemRedeemPoints='-';}else{ $row->TotalItemRedeemPoints=$row->TotalItemRedeemPoints;}
+							if($row->TotalQuantity==0 ){$row->TotalQuantity='-';}else{ $row->TotalQuantity=$row->TotalQuantity;}
+							$data[] = $row;
+							
+						}
+						return $data;
+					}
+				
+			}
+		}
+		else
+		{
+			if($Report_type=='0')
+			{
+				if($Merchant == '0' && $Trans_Type == '0' )
+				{
+					// echo"here.........";
+					$this->db->select("igain_transaction.Trans_date AS TransactionDate,igain_transaction.Bill_no AS BillNo,igain_transaction_type.Trans_type AS TransactionType,igain_transaction.Purchase_amount AS PurchaseAmount,igain_transaction.Topup_amount AS BounsPoints,igain_transaction.Redeem_points AS RedeemPoints,igain_transaction.Loyalty_pts AS GainPoints,igain_transaction.Seller_name AS DoneBy,igain_transaction.Transfer_points AS TransferPoints,igain_transaction.Card_id2 as TransferTo,igain_transaction.Card_id2 as TransferTo,igain_transaction.Remarks as Remarks");
+					$this->db->from('igain_transaction');
+					$this->db->where('igain_transaction.Trans_date >=', $startDate);
+					$this->db->where('igain_transaction.Trans_date <=', $endDate);
+					$this->db->where('igain_transaction.Trans_type != 10 ');
+					$this->db->where('igain_transaction.Company_id ', $Company_id);
+					$this->db->where('igain_transaction.Enrollement_id ', $Enrollment_id);
+					$this->db->where('igain_transaction.Card_id ', $membership_id);
+					$this->db->join('igain_transaction_type', 'igain_transaction.Trans_type = igain_transaction_type.Trans_type_id');
+					$this->db->order_by('igain_transaction.Trans_id', 'DESC');
+					$this->db->limit($limit,$start);
+					$query = $this->db->get();
+					// echo $this->db->last_query(); 
+					
+					if ($query->num_rows() > 0)
+					{
+						
+						foreach ($query->result() as $row)
+						{
+							if($row->BillNo==0 ){$row->BillNo='-';}else{ $row->BillNo=$row->BillNo;}									
+							if($row->PurchaseAmount==0 ){$row->PurchaseAmount='-';}else{ $row->PurchaseAmount=$row->PurchaseAmount;}
+							if($row->BounsPoints==0 ){$row->BounsPoints='-';}else{ $row->BounsPoints=$row->BounsPoints;}
+							if($row->RedeemPoints==0 ){$row->RedeemPoints='-';}else{$row->RedeemPoints=$row->RedeemPoints;}								
+							if($row->GainPoints==0 ){$row->GainPoints='-';}else{ $row->GainPoints=$row->GainPoints;}
+							if($row->DoneBy!="" ){ $row->DoneBy=$row->DoneBy; }else { $row->DoneBy='-';}
+							if($row->TransferPoints==0 ){$row->TransferPoints='-';}else{ $row->TransferPoints=$row->TransferPoints;}
+							if($row->Remarks=="" ){$row->Remarks='-';}else{ $row->Remarks=$row->Remarks;}
+							if($row->TransferTo==0 ){$row->TransferTo='-';}else{ $row->TransferTo=$row->TransferTo;}
+							
+							$data[] = $row;
+							
+						}
+						return $data;
+					}					
+				}
+				else if( $Merchant != '0' && $Trans_Type == '0' )
+				{
+					$this->db->select("igain_transaction.Trans_date AS TransactionDate,igain_transaction.Bill_no AS BillNo,igain_transaction_type.Trans_type AS TransactionType,igain_transaction.Purchase_amount AS PurchaseAmount,igain_transaction.Topup_amount AS BounsPoints,igain_transaction.Redeem_points AS RedeemPoints,igain_transaction.Loyalty_pts AS GainPoints,igain_transaction.Seller_name AS DoneBy,igain_transaction.Transfer_points AS TransferPoints,igain_transaction.Card_id2 as TransferTo,igain_transaction.Remarks as Remarks");
+					$this->db->from('igain_transaction');
+					$this->db->where('igain_transaction.Trans_date >=', $startDate);
+					$this->db->where('igain_transaction.Trans_date <=', $endDate);
+					$this->db->where('igain_transaction.Trans_type != 10 ');
+					$this->db->where('igain_transaction.Company_id ', $Company_id);
+					$this->db->where('igain_transaction.Enrollement_id ', $Enrollment_id);
+					$this->db->where('igain_transaction.Card_id ', $membership_id);
+					$this->db->where('igain_transaction.Seller ', $Merchant);
+					$this->db->join('igain_transaction_type', 'igain_transaction.Trans_type = igain_transaction_type.Trans_type_id');
+					$this->db->order_by('igain_transaction.Trans_id', 'DESC');
+					$this->db->limit($limit,$start);
+					$query = $this->db->get();
+					
+					if ($query->num_rows() > 0)
+					{
+						
+						foreach ($query->result() as $row)
+						{
+							if($row->BillNo==0 ){$row->BillNo='-';}else{ $row->BillNo=$row->BillNo;}									
+							if($row->PurchaseAmount==0 ){$row->PurchaseAmount='-';}else{ $row->PurchaseAmount=$row->PurchaseAmount;}
+							if($row->BounsPoints==0 ){$row->BounsPoints='-';}else{ $row->BounsPoints=$row->BounsPoints;}
+							if($row->RedeemPoints==0 ){$row->RedeemPoints='-';}else{$row->RedeemPoints=$row->RedeemPoints;}								
+							if($row->GainPoints==0 ){$row->GainPoints='-';}else{ $row->GainPoints=$row->GainPoints;}
+							if($row->DoneBy!="" ){ $row->DoneBy=$row->DoneBy; }else { $row->DoneBy='-';}
+							if($row->TransferPoints==0 ){$row->TransferPoints='-';}else{ $row->TransferPoints=$row->TransferPoints;}
+							if($row->Remarks=="" ){$row->Remarks='-';}else{ $row->Remarks=$row->Remarks;}
+							if($row->TransferTo==0 ){$row->TransferTo='-';}else{ $row->TransferTo=$row->TransferTo;}
+							
+							$data[] = $row;
+							
+						}
+						return $data;
+					}
+				}
+				else
+				{ 
+					$this->db->select("igain_transaction.Trans_date AS TransactionDate,igain_transaction.Bill_no AS BillNo,igain_transaction_type.Trans_type AS TransactionType,igain_transaction.Purchase_amount AS PurchaseAmount,igain_transaction.Topup_amount AS BounsPoints,igain_transaction.Redeem_points AS RedeemPoints,igain_transaction.Loyalty_pts AS GainPoints,igain_transaction.Seller_name AS DoneBy,igain_transaction.Transfer_points AS TransferPoints,igain_transaction.Card_id2 as TransferTo,igain_transaction.Remarks as Remarks");
+					$this->db->from('igain_transaction');
+					$this->db->where('igain_transaction.Trans_date >=', $startDate);
+					$this->db->where('igain_transaction.Trans_date <=', $endDate);
+					$this->db->where('igain_transaction.Trans_type != 10 ');
+					$this->db->where('igain_transaction.Company_id ', $Company_id);
+					$this->db->where('igain_transaction.Enrollement_id ', $Enrollment_id);
+					$this->db->where('igain_transaction.Card_id ', $membership_id);
+					// $this->db->where('igain_transaction.Seller ', $Merchant);
+					$this->db->where('igain_transaction.Trans_type ', $Trans_Type);
+					$this->db->join('igain_transaction_type', 'igain_transaction.Trans_type = igain_transaction_type.Trans_type_id');
+					$this->db->order_by('igain_transaction.Trans_id', 'DESC');
+					$this->db->limit($limit,$start);
+					$query = $this->db->get();
+					
+					if ($query->num_rows() > 0)
+					{
+						
+						foreach ($query->result() as $row)
+						{
+							if($row->BillNo==0 ){$row->BillNo='-';}else{ $row->BillNo=$row->BillNo;}									
+							if($row->PurchaseAmount==0 ){$row->PurchaseAmount='-';}else{ $row->PurchaseAmount=$row->PurchaseAmount;}
+							if($row->BounsPoints==0 ){$row->BounsPoints='-';}else{ $row->BounsPoints=$row->BounsPoints;}
+							if($row->RedeemPoints==0 ){$row->RedeemPoints='-';}else{$row->RedeemPoints=$row->RedeemPoints;}								
+							if($row->GainPoints==0 ){$row->GainPoints='-';}else{ $row->GainPoints=$row->GainPoints;}
+							if($row->DoneBy!="" ){ $row->DoneBy=$row->DoneBy; }else { $row->DoneBy='-';}
+							if($row->TransferPoints==0 ){$row->TransferPoints='-';}else{ $row->TransferPoints=$row->TransferPoints;}
+							if($row->Remarks=="" ){$row->Remarks='-';}else{ $row->Remarks=$row->Remarks;}
+							if($row->TransferTo==0 ){$row->TransferTo='-';}else{ $row->TransferTo=$row->TransferTo;}
+							
+							$data[] = $row;
+							
+						}
+						return $data;
+					}
+				}
+			}			
+			else
+			{
+				if($Merchant == '0' && $Trans_Type == '0' )
+				{
+					$this->db->select("igain_transaction_type.Trans_type  AS TransactionType,sum(igain_transaction.Purchase_amount) AS TotalPurchaseAmount,sum(igain_transaction.Topup_amount) AS TotalBonusPoints,sum(igain_transaction.Redeem_points) AS TotalRedeemPoints ,sum(igain_transaction.Loyalty_pts) AS TotalGainPoints,sum(igain_transaction.Transfer_points) AS TotalTransPoints");
+					$this->db->from('igain_transaction');
+					$this->db->where('igain_transaction.Trans_date >=', $startDate);
+					$this->db->where('igain_transaction.Trans_date <=', $endDate);
+					$this->db->where('igain_transaction.Company_id ', $Company_id);
+					$this->db->where('igain_transaction.Trans_type != 10 ');
+					$this->db->where('igain_transaction.Enrollement_id ', $Enrollment_id);
+					$this->db->where('igain_transaction.Card_id ', $membership_id);
+					$this->db->join('igain_transaction_type', 'igain_transaction.Trans_type = igain_transaction_type.Trans_type_id');
+					$this->db->group_by('igain_transaction.Trans_type'); 
+					$this->db->limit($limit,$start);
+					$query = $this->db->get();
+					
+					if ($query->num_rows() > 0)
+					{
+						
+						foreach ($query->result() as $row)
+						{
+							if($row->TransactionType=="" ){$row->TransactionType='-';}else{ $row->TransactionType=$row->TransactionType;}
+							if($row->TotalPurchaseAmount==0 ){$row->TotalPurchaseAmount='-';}else{ $row->TotalPurchaseAmount=$row->TotalPurchaseAmount;}
+							if($row->TotalBonusPoints==0 ){$row->TotalBonusPoints='-';}else{ $row->TotalBonusPoints=$row->TotalBonusPoints;}
+							if($row->TotalRedeemPoints==0 ){$row->TotalRedeemPoints='-';}else{$row->TotalRedeemPoints=$row->TotalRedeemPoints;}	
+							if($row->TotalGainPoints==0 ){$row->TotalGainPoints='-';}else{ $row->TotalGainPoints=$row->TotalGainPoints;}
+							if($row->TotalTransPoints==0 ){$row->TotalTransPoints='-';}else {$row->TotalTransPoints=$row->TotalTransPoints;}
+							$data[] = $row;
+							
+						}
+						return $data;
+					}
+					
+					
+				}
+				else if( $Merchant != '0' && $Trans_Type == '0' )
+				{
+					$this->db->select("igain_transaction_type.Trans_type  AS TransactionType,sum(igain_transaction.Purchase_amount) AS TotalPurchaseAmount,sum(igain_transaction.Topup_amount) AS TotalBonusPoints,sum(igain_transaction.Redeem_points) AS TotalRedeemPoints ,sum(igain_transaction.Loyalty_pts) AS TotalGainPoints,sum(igain_transaction.Transfer_points) AS TotalTransPoints");
+					$this->db->from('igain_transaction');
+					$this->db->where('igain_transaction.Trans_date >=', $startDate);
+					$this->db->where('igain_transaction.Trans_date <=', $endDate);
+					$this->db->where('igain_transaction.Company_id ', $Company_id);
+					$this->db->where('igain_transaction.Trans_type != 10 ');
+					$this->db->where('igain_transaction.Enrollement_id ', $Enrollment_id);
+					$this->db->where('igain_transaction.Card_id ', $membership_id);
+					$this->db->where('igain_transaction.Seller ', $Merchant);
+					$this->db->join('igain_transaction_type', 'igain_transaction.Trans_type = igain_transaction_type.Trans_type_id');
+					 $this->db->group_by('igain_transaction.Trans_type'); 
+					 $this->db->limit($limit,$start);
+					$query = $this->db->get();
+					// echo $this->db->last_query();
+					if ($query->num_rows() > 0)
+					{
+						
+						foreach ($query->result() as $row)
+						{
+							if($row->TransactionType=="" ){$row->TransactionType='-';}else{ $row->TransactionType=$row->TransactionType;}
+							if($row->TotalPurchaseAmount==0 ){$row->TotalPurchaseAmount='-';}else{ $row->TotalPurchaseAmount=$row->TotalPurchaseAmount;}
+							if($row->TotalBonusPoints==0 ){$row->TotalBonusPoints='-';}else{ $row->TotalBonusPoints=$row->TotalBonusPoints;}
+							if($row->TotalRedeemPoints==0 ){$row->TotalRedeemPoints='-';}else{$row->TotalRedeemPoints=$row->TotalRedeemPoints;}	
+							if($row->TotalGainPoints==0 ){$row->TotalGainPoints='-';}else{ $row->TotalGainPoints=$row->TotalGainPoints;}
+							if($row->TotalTransPoints==0 ){$row->TotalTransPoints='-';}else {$row->TotalTransPoints=$row->TotalTransPoints;}
+							$data[] = $row;
+							
+						}
+						return $data;
+					}
+				}
+				else
+				{
+					$this->db->select("igain_transaction_type.Trans_type  AS TransactionType,sum(igain_transaction.Purchase_amount) AS TotalPurchaseAmount,sum(igain_transaction.Topup_amount) AS TotalBonusPoints,sum(igain_transaction.Redeem_points) AS TotalRedeemPoints ,sum(igain_transaction.Loyalty_pts) AS TotalGainPoints,sum(igain_transaction.Transfer_points) AS TotalTransPoints");
+					$this->db->from('igain_transaction');
+					$this->db->where('igain_transaction.Trans_date >=', $startDate);
+					$this->db->where('igain_transaction.Trans_date <=', $endDate);
+					$this->db->where('igain_transaction.Trans_type != 10 ');
+					$this->db->where('igain_transaction.Company_id ', $Company_id);
+					$this->db->where('igain_transaction.Enrollement_id ', $Enrollment_id);
+					$this->db->where('igain_transaction.Card_id ', $membership_id);
+					// $this->db->where('igain_transaction.Seller ', $Merchant);
+					$this->db->where('igain_transaction.Trans_type ', $Trans_Type);
+					$this->db->join('igain_transaction_type', 'igain_transaction.Trans_type = igain_transaction_type.Trans_type_id');
+					$this->db->group_by('igain_transaction.Trans_type');
+					$this->db->limit($limit,$start);					 
+					$query = $this->db->get();
+					
+					if ($query->num_rows() > 0)
+					{
+						
+						foreach ($query->result() as $row)
+						{
+							if($row->TransactionType=="" ){$row->TransactionType='-';}else{ $row->TransactionType=$row->TransactionType;}
+							if($row->TotalPurchaseAmount==0 ){$row->TotalPurchaseAmount='-';}else{ $row->TotalPurchaseAmount=$row->TotalPurchaseAmount;}
+							if($row->TotalBonusPoints==0 ){$row->TotalBonusPoints='-';}else{ $row->TotalBonusPoints=$row->TotalBonusPoints;}
+							if($row->TotalRedeemPoints==0 ){$row->TotalRedeemPoints='-';}else{$row->TotalRedeemPoints=$row->TotalRedeemPoints;}	
+							if($row->TotalGainPoints==0 ){$row->TotalGainPoints='-';}else{ $row->TotalGainPoints=$row->TotalGainPoints;}
+							if($row->TotalTransPoints==0 ){$row->TotalTransPoints='-';}else {$row->TotalTransPoints=$row->TotalTransPoints;}
+							$data[] = $row;
+							
+						}
+						return $data;
+					}
+				}
+			}
+		}		
+	
+	}
+	function Fetch_Game_Master_Details()
+	{
+		$this->db->select("*");
+		$query = $this->db->get('igain_game_master');
+		return $query->result_array();
+	}
+	function Auction_Total_Bidder($Auction_id,$Company_id)
+	{
+		$this->db->select("Id");
+		$this->db->from("igain_auction_winner");
+		$this->db->where(array('Company_id' => $Company_id,'Auction_id' => $Auction_id,'igain_auction_winner.Winner_flag' => 0,'igain_auction_winner.Active_flag' => 0));		
+		$query = $this->db->get();		
+		return $query->num_rows();
+	}
+	function Fetch_TOP3_Company_Auction($Company_id,$today)
+	{
+		$this->db->limit('5');
+		$this->db->select("*");
+		$this->db->from("igain_auction_master");
+		// $this->db->where(array('Company_id' => $Company_id,'Active_flag' =>'1'));	
+		$this->db->where(array('Company_id' => $Company_id,'Active_flag' =>'1'));	
+		$this->db->where("'".$today."' BETWEEN From_date AND To_date");
+		$query = $this->db->get();		
+		return $query->result_array();
+		
+		// $this->db->where('order_datetime <','2012-10-03');
+		// $this->db->where('order_datetime >','2012-10-01');
+	}
+	function Get_latest_merchandize_items($Company_id,$today)
+	{
+		$this->db->limit('8');
+		$this->db->select("*");
+		$this->db->from("igain_company_merchandise_catalogue");
+		$this->db->where(array('Company_id' => $Company_id,'Active_flag' =>'1'));	
+		$this->db->where("'".$today."' BETWEEN Valid_from AND Valid_till");
+		$this->db->order_by('Company_merchandise_item_id', 'DESC');
+		$query = $this->db->get();		
+		return $query->result_array();
+	}
+	function Auction_Top_Bidder($Auction_id,$Company_id)
+	{
+		$this->db->limit('5');
+		$this->db->select("Enrollment_id,Bid_value,First_name,Last_name,Photograph");
+		$this->db->from("igain_auction_winner");
+		$this->db->join('igain_enrollment_master', 'igain_auction_winner.Enrollment_id = igain_enrollment_master.Enrollement_id');
+		$this->db->order_by('igain_auction_winner.Bid_value', 'DESC');
+		$this->db->where(array('igain_auction_winner.Company_id' => $Company_id,'Auction_id' => $Auction_id,'igain_auction_winner.Winner_flag' => 0,'igain_auction_winner.Active_flag' => 0));	
+		
+		$query = $this->db->get();
+		
+		if( $query->num_rows() > 0)
+		{
+			return $query->result_array();
+		}
+	}
+	function Auction_Max_Bid_Value($Auction_id,$Company_id)
+	{
+		$this->db->select_max('Bid_value');
+		$this->db->from("igain_auction_winner");
+		$this->db->where(array('Company_id' => $Company_id,'Auction_id' => $Auction_id,'igain_auction_winner.Winner_flag' => 0,'igain_auction_winner.Active_flag' => 0));			
+		$query = $this->db->get();
+		// echo"------last_query-----".$this->db->last_query();
+		if( $query->num_rows() > 0)
+		{
+			return $query->result_array();
+		}
+	}
+	function Fetch_Auction_Max_Bid_Value($Auction_id,$Company_id)
+	{
+		$this->db->select('MAX(Bid_value),Min_increment');
+		$this->db->from("igain_auction_winner");		
+		$this->db->where(array('igain_auction_winner.Company_id' => $Company_id,'igain_auction_winner.Auction_id' => $Auction_id,'igain_auction_winner.Winner_flag' => 0,'igain_auction_winner.Active_flag' => 0));	
+		$this->db->join('igain_auction_master', 'igain_auction_winner.Auction_id = igain_auction_master.Auction_id');
+		$query = $this->db->get();
+		// echo"------last_query-----".$this->db->last_query();
+		if( $query->num_rows() > 0)
+		{
+			return $query->result_array();
+		}
+	}
+	
+	function insert_auction_bidding($Super_Seller)
+    {
+		$this->load->model('Igain_model');	
+		$email_flag = $this->input->post('email_validity');		
+		
+		$data['Auction_id'] = $this->input->post('auctionID');
+		$data['Company_id'] = $this->input->post('compid');        
+		$data['Enrollment_id'] = $this->input->post('custEnrollId');
+		$Member_Enrollment_id = $this->input->post('custEnrollId');
+		$data['Prize'] = $this->input->post('Prize');
+		$data['Bid_value'] = $this->input->post('bidval');
+		$data['Create_user_id'] = $this->input->post('custEnrollId');
+		$data['Creation_date'] = date('Y-m-d H:i:s');		
+		$this->db->insert('igain_auction_winner', $data);
+		
+		if($this->db->affected_rows() > 0)
+		{
+				$this->db->select("*");
+				$this->db->order_by("Id", "DESC");
+				$query = $this->db->get_where('igain_auction_winner', array('Company_id' => $data['Company_id'],'Auction_id' => $data['Auction_id'],'igain_auction_winner.Winner_flag' => 0,'igain_auction_winner.Active_flag' => 0), 1, 1);
+				$num_rows = $query->num_rows();
+				$result= $query->result(); 
+				if($num_rows > 0)
+				{
+					foreach($result as $row)
+					{
+						$ID_1= $row->Id;
+						$Auction_id_1= $row->Auction_id;
+						$Enrollment_id_1 =$row->Enrollment_id;
+						$Bid_value_1= $row->Bid_value;
+						$Company_id_1= $row->Company_id;
+						
+					}				
+					
+					$Auction_details=$this->Igain_model->get_auction_details($Auction_id_1);
+					$Auction_name=$Auction_details->Auction_name;
+					$To_date=$Auction_details->To_date;
+					$Min_increment=$Auction_details->Min_increment;
+					$Min_Bid_Value=$Min_increment + $data['Bid_value'];
+					
+					
+					$Enrollment_Details=$this->Igain_model->get_enrollment_details($Enrollment_id_1);
+					$User_email_id_1=$Enrollment_Details->User_email_id;
+					$First_name_1=$Enrollment_Details->First_name;
+					$Last_name_1=$Enrollment_Details->Last_name;
+					$User_email_id_1=$Enrollment_Details->User_email_id;
+					$BlockedPoints_1=$Enrollment_Details->Blocked_points;
+					$TotalBlockPoints_1=$BlockedPoints_1 - $Bid_value_1;
+					
+					$data1=array('Blocked_points' => $TotalBlockPoints_1 );
+					$this->db->where(array('Company_id' => $data['Company_id'],'Enrollement_id' => $Enrollment_id_1));
+					$this->db->update('igain_enrollment_master',$data1);
+						
+					$Enrollment_Details=$this->Igain_model->get_enrollment_details($data['Enrollment_id']);
+					$BlockedPoints=$Enrollment_Details->Blocked_points;					
+					$TotalBlockPoints=$BlockedPoints + $data['Bid_value'];
+					
+					$data1=array('Blocked_points' => $TotalBlockPoints );
+					$this->db->where(array('Company_id' => $data['Company_id'],'Enrollement_id' => $data['Enrollment_id']));
+					$this->db->update('igain_enrollment_master',$data1);
+					
+					$entry_date = date('Y-m-d');
+					
+					if($Member_Enrollment_id != $Enrollment_id_1)
+					{
+						/* $Email_content = array(
+									'Company_id' => $data['Company_id'] ,
+									'Seller_id' => $Super_Seller ,
+									'Customer_id' => $Enrollment_id_1,
+									'Communication_id' => '0' ,
+									'User_email_id' => $User_email_id_1,
+									'Offer' => 'You are No Longer the Highest Bidder of <b>'.$Auction_name.' </b> ',
+									'Offer_description' => ' Dear '.$First_name_1.' '.$Last_name_1.', <br><br>You are no Longer the Highest Bidder for the Auction - <b>'.$Auction_name.' </b>.<br><br> BID again and be the Higest BIDDER!!<br><br> <span class="label label-danger"> The Current Highest Bid Value is-'.$Min_Bid_Value.'</span>',
+									'Open_flag' => '0',
+									'Date' => $entry_date
+								); */
+								
+								
+								$Email_content = array(
+									// 'Pin_No' => $get_pin->pinno,
+									'Notification_type' => 'No Longer Bidder',
+									'Auction_name' => $Auction_name,
+									'Min_Bid_Value' => $Min_Bid_Value,
+									'Bid_value_1' => $Bid_value_1,
+									'Template_type' => 'No_longer_bider'
+									);
+									// print_r($Email_content);
+						// $this->Igain_model->insert_cust_notification($cust_notification,'1');
+						$this->send_notification->send_Notification_email($Enrollment_id_1,$Email_content,$Super_Seller,$data['Company_id']);
+						return true;
+					}					
+					/* if($this->db->affected_rows() > 0)
+					{
+						return true;
+					}
+					 */
+					
+				}
+				else
+				{
+					
+					$Enrollment_Details=$this->Igain_model->get_enrollment_details($data['Enrollment_id']);
+					$BlockedPoints=$Enrollment_Details->Blocked_points;					
+					$TotalBlockPoints=$BlockedPoints + $data['Bid_value'];
+					
+					$data1=array('Blocked_points' => $TotalBlockPoints );
+					$this->db->where(array('Company_id' => $data['Company_id'],'Enrollement_id' => $data['Enrollment_id']));
+					$this->db->update('igain_enrollment_master',$data1);
+					
+					if($this->db->affected_rows() > 0)
+					{
+						return true;
+					} 
+				
+				}
+				
+			return true;	
+		}
+		
+		return false;
+    }
+	
+	function check_promocode($promocode,$Company_id)
+	{
+		// $this->db->where("Trans_date BETWEEN '".$lastmonth."' AND '".$thismonth."' "); igain_promo_campaign
+		$today=date('Y-m-d');
+		
+		$query =  $this->db->select('PC.Promo_code');
+				  $this->db->from('igain_promo_campaign_child AS PC');
+				 $this->db->join('igain_promo_campaign as P', 'PC.Campaign_id = P.Campaign_id');
+				   $this->db->where(array('PC.Promo_code' => $promocode,'PC.Company_id' => $Company_id,'PC.Active_flag' =>'1','PC.Promo_code_status' => '0'));
+				   $this->db->where(" '".$today."' BETWEEN From_date AND To_date ");
+				  $query = $this->db->get();
+				  // echo $this->db->last_query();
+				 if($query->num_rows() > 0)
+				{  
+					return $query->row();
+				}
+			
+			
+	}
+	function Check_EmailID($emailId,$Company_id)
+	{
+		
+		$query =  $this->db->select('User_email_id')
+				   ->from('igain_enrollment_master')
+				   ->where(array('User_email_id' => $emailId,'User_id=1','Company_id' => $Company_id))->get();
+				   // echo $this->db->last_query();
+			return $query->num_rows();
+	}
+	function CheckPhone_number($phoneNo,$Company_id)
+	{
+		
+		$query =  $this->db->select('Phone_no')
+				   ->from('igain_enrollment_master')
+				   ->where(array('Phone_no' => $phoneNo ,'User_id = 1 ','Company_id' => $Company_id))->get();
+			return $query->num_rows();
+	}
+	function Check_Old_Password($old_Password,$Company_id,$Enrollment_id)
+	{
+		
+		$query =  $this->db->select('User_pwd')
+				   ->from('igain_enrollment_master')
+				   ->where(array('User_pwd' => $old_Password,'Company_id' => $Company_id,'Enrollement_id' =>$Enrollment_id))->get();
+			return $query->num_rows();
+	}
+	function Check_Old_Pin($old_pin,$Company_id,$Enrollment_id)
+	{
+		
+		$query =  $this->db->select('pinno')
+				   ->from('igain_enrollment_master')
+				   ->where(array('pinno' => $old_pin,'Company_id' => $Company_id,'Enrollement_id' =>$Enrollment_id))->get();
+			return $query->num_rows();
+	}
+	
+	public function Change_Old_Pin($Company_id,$Enrollment_id,$new_pin)
+	{
+		$data11=array('pinno' => $new_pin );
+		$this->db->where(array('Company_id' => $Company_id,'Enrollement_id' => $Enrollment_id));
+		$this->db->update('igain_enrollment_master',$data11);		
+		if($this->db->affected_rows() > 0)
+		{
+			return true;
+		}  
+	}
+	public function get_customer_pin($Company_id,$Enrollment_id)
+	{
+			$this->db->select('pinno');
+			$this->db ->from('igain_enrollment_master');
+			$this->db->where(array('Enrollement_id' => $Enrollment_id,'Company_id' => $Company_id,'User_id' => 1,'User_activated' => 1));
+			$query = $this->db->get();
+			if($query->num_rows() > 0)
+			{
+			  return $query->row();
+			}
+		
+	}
+	public function Change_Old_Password($old_Password,$Company_id,$Enrollment_id,$new_Password)
+	{
+		$data1=array('User_pwd' => $new_Password );
+		$this->db->where(array('Company_id' => $Company_id,'Enrollement_id' => $Enrollment_id));
+		$this->db->update('igain_enrollment_master',$data1);		
+		if($this->db->affected_rows() > 0)
+		{
+			return true;
+		}  
+	}
+	public function merchant_item_count()
+	{
+		$this->db->select('*');
+		$this->db->from('igain_company_merchandise_catalogue');
+		return $this->db->count_all_results();
+	}
+	
+	public function merchant_selected_item_count($Merchandise_Category)
+	{
+		$this->db->select('*');
+		$this->db->from('igain_company_merchandise_catalogue');
+		$this->db->where(array('Merchandize_category_id' => $Merchandise_Category));
+		return $this->db->count_all_results();
+	}
+	public function Merchant_Loyalty_Offers_Count($Enrollment_id,$Company_id)
+	{
+		$this->db->select('*');
+		$this->db->from('igain_loyalty_master');
+		$this->db->where(array('Company_id' => $Company_id,'Seller' => $Enrollment_id,'Active_flag' =>'1'));
+		return $this->db->count_all_results(); 
+		
+		/* $this->db->select("*");
+		$this->db->where(array('Company_id' => $Company_id,'Seller' => $Enrollment_id));
+		$query = $this->db->get('igain_loyalty_master');
+		return $query->result_array();  */
+	}
+	public function merchant_item_list($limit,$start)
+	{
+		$this->db->select('*');
+		$this->db->from('igain_company_merchandise_catalogue');
+		$this->db->limit($limit,$start);
+		$this->db->order_by('Company_merchandise_item_id','ASC');
+		$query = $this->db->get();
+
+        if ($query->num_rows() > 0)
+		{
+        	foreach ($query->result() as $row)
+			{
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+   }
+   public function merchant_selected_item_list($MerchandiseCatId,$limit,$start)
+  {
+		$this->db->select('*');
+		$this->db->from('igain_company_merchandise_catalogue');
+		$this->db->where(array('Merchandize_category_id' => $MerchandiseCatId));	
+		$this->db->limit($limit,$start);
+		$this->db->order_by('Company_merchandise_item_id','ASC');
+		$query = $this->db->get();
+
+        if( $query->num_rows() > 0)
+		{
+			return $query->result_array();
+		}
+        return false;
+   }
+   public function forgot_email_notification($email,$Company_id)
+	{
+		
+        $this->db->select('User_pwd,Enrollement_id');
+		$this->db->from('igain_enrollment_master');
+		$this->db->where(array('Company_id' => $Company_id,'User_email_id' => $email,'User_id' =>'1'));	
+		$query = $this->db->get();
+		
+        if($query -> num_rows() == 1)
+		{
+			return $query->row();
+		}
+		else
+		{
+			return false;
+		}
+   }
+   function insert_cust_notification($data,$insert_flag)
+    {
+		// var_dump( $data);
+		if($insert_flag == "1")
+		{
+			$this->db->insert('igain_cust_notification', $data);
+			if($this->db->affected_rows() > 0)
+			{
+				return true;
+			}
+		}
+		else
+		{
+			$this->db->insert_batch('igain_cust_notification', $data);
+			if($this->db->affected_rows() > 0)
+			{
+				return $this->db->affected_rows();
+			}
+		}		
+    }
+	
+	public function Insert_servey_response($Company_id,$Enrollment_id,$Question_id,$Response_type,$response)
+	{	
+			if($Response_type=='1')
+			{	
+				$data1=array('Enrollment_id' => $Enrollment_id,'Company_id' => $Company_id,'Question_id' => $Question_id,'Response2' => $response);
+			}
+			else
+			{
+				$data1=array('Enrollment_id' => $Enrollment_id,'Company_id' => $Company_id,'Question_id' => $Question_id,'Response1' => $response);
+			}
+			
+			$this->db->insert('igain_response_master', $data1);
+			if($this->db->affected_rows() > 0)
+			{
+				return $this->db->affected_rows();
+			}
+		
+		
+	}
+	public function Update_servey_response($Company_id,$Enrollment_id,$Question_id,$Response_type,$response,$Responce_id1)
+	{	
+	
+				// echo"---Response_type-----". $Response_type."<br>";
+			if($Response_type=='1')
+			{	
+				// echo"---Responce_id1-----". $Responce_id1."<br>";
+				$data1=array('Response2' => $response);
+			}
+			else
+			{
+				$data1=array('Response1' => $response);
+			}
+			$this->db->where(array('Response_id' => $Responce_id1,'Company_id' => $Company_id,'Enrollment_id' => $Enrollment_id,'Question_id' => $Question_id));
+			// echo $this->db->last_query();
+			$this->db->update('igain_response_master',$data1);		
+			
+			
+			
+		
+	}
+	function Check_survey_dulplicate($Enrollment_id,$Company_id,$Question_id)
+	{
+		
+		$query =  $this->db->select('*')
+				   ->from('igain_response_master')
+				   ->where(array('Enrollment_id' => $Enrollment_id,'Company_id' => $Company_id,'Question_id' =>$Question_id))->get();
+				   
+				   // return $query->result_array();
+			return $query->num_rows();
+			
+			
+			
+			
+	}
+	function Fetch_response_id($Enrollment_id,$Company_id,$Question_id)
+	{
+		
+		$query =  $this->db->select('*')
+				   ->from('igain_response_master')
+				   ->where(array('Enrollment_id' => $Enrollment_id,'Company_id' => $Company_id,'Question_id' =>$Question_id))->get();
+				   
+				  return $query->row();
+			// return $query->num_rows();
+			
+			
+			
+			
+	}
+	public function Insert_contactus_message($Company_id,$Enrollment_id,$Membership_id,$contact_subject,$contactus_SMS)
+	{	
+		$today=date('Y-m-d');
+		$data1=array('Enrollment_id' => $Enrollment_id,'Company_id' => $Company_id,'Membership_id' => $Membership_id,'Header_type' => $contact_subject,'Content_description' => $contactus_SMS,'Creation_date' => $today);		
+			
+		$this->db->insert('igain_contact_us_tbl', $data1);
+		if($this->db->affected_rows() > 0)
+		{
+			return $this->db->affected_rows();
+		}
+		
+		
+	}	
+	public function UpdateCompanyMembershipID($Card_id1,$Company_id)
+	{
+		$data=array('next_card_no' => $Card_id1);
+		$this->db->where('Company_id',$Company_id);
+		$this->db->update('igain_company_master',$data);
+		if($this->db->affected_rows() > 0)
+		{
+			return true;
+		}		
+	}
+	public function insert_enroll_details($data)
+	{
+		$this->db->select('Tier_id');
+		$this->db->from('igain_tier_master');
+		$this->db->where(array('Company_id'=> $data['Company_id'],'Tier_level_id' => '1'));
+		
+		$tier_query = $this->db->get();
+		//echo $this->db->last_query();
+		if($tier_query->num_rows() > 0)
+		{
+			$tier_info = $tier_query->row();
+			
+			$TierID = $tier_info->Tier_id;
+		}
+		else
+		{
+			$TierID = 0;
+		}
+		
+		
+		
+		$data['Tier_id'] = $TierID;
+		
+		$this->db->insert('igain_enrollment_master', $data);		
+		if($this->db->affected_rows() > 0)
+		{
+			// return true;
+			$insert_id = $this->db->insert_id();
+			return  $insert_id;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	function fetch_enrollment_details($Company_id,$Membership_id)
+	{
+		
+		$this->db->from('igain_enrollment_master');
+		$this->db->where(array('User_id' => 1,'User_activated' => 1,'Company_id' => $Company_id,'Card_id' => $Membership_id));
+		$query = $this->db->get();		
+		if($query->num_rows() == 1)
+		{			
+			foreach ($query->result() as $row)
+			{
+               $result[] = array("Enrollement_id" => $row->Enrollement_id, "First_name" => $row->First_name,"Last_name" => $row->Last_name, "Phone_no" => $row->Phone_no, "User_email_id" => $row->User_email_id, "Company_id" => $row->Company_id, "Current_balance" => $row->Current_balance, "Card_id" => $row->Card_id);
+            }			
+			return json_encode($result);
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	public function Insert_transfer_transaction($data)
+	{
+		$this->db->insert('igain_transaction', $data);		
+		if($this->db->affected_rows() > 0)
+		{
+			return true;
+			
+		}
+		else
+		{
+			return false;
+		}
+	}
+	public function Update_member_balance($Company_id,$Enrollement_id,$New_curr_balance)
+	{
+		$data=array('Current_balance' => $New_curr_balance);
+		$this->db->where(array('Enrollement_id' => $Enrollement_id,'Company_id' => $Company_id));
+		$this->db->update('igain_enrollment_master',$data);
+		if($this->db->affected_rows() > 0)
+		{
+			return true;
+		}		
+	}
+	function Fetch_item_details($Item,$Company)
+	{
+		$this->db->select("Merchandize_item_name");
+		$this->db->from('igain_company_merchandise_catalogue');
+		$this->db->where(array('Company_merchandize_item_code' => $Item,'Company_id' => $Company));
+		
+		$sql12 = $this->db->get();
+		if($sql12 -> num_rows() == 1)
+		{
+			return $sql12->row();
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	function get_tier_details($Tier_id,$CompanyId)
+	{
+		$this->db->select("Tier_name");
+		$this->db->from('igain_tier_master');
+		$this->db->where(array('Tier_id' => $Tier_id,'Active_flag' => 1,'Company_id' => $CompanyId));		
+		$sql = $this->db->get();
+		if($sql ->num_rows() == 1)
+		{
+			return $sql->row();			
+		}
+		else
+		{
+			return false;
+		}
+	}
+	function get_tier_name($Tier_id)
+	{
+		$this->db->select("Tier_name");
+		$this->db->from('igain_tier_master');
+		$this->db->where(array('Tier_id' => $Tier_id,'Active_flag' => 1));		
+		$sql = $this->db->get();
+		if($sql ->num_rows() == 1)
+		{
+			return $sql->row();			
+		}
+		else
+		{
+			return false;
+		}
+	}
+/********************************************Ravi end*******************************/
+
+
+/********************************************Amit start*******************************/
+	function get_cust_trans_summary_all($Company_id,$Enrollement_id)
+	{
+		$this->db->select('IE.First_name,IE.Middle_name,IE.Last_name,IT.Card_id,IE.Enrollement_id,SUM(Redeem_points) AS Total_reddems,SUM(Loyalty_pts) as Total_gained_points,SUM(Topup_amount) as Total_bonus_ponus,SUM(Purchase_amount) as Total_purchase_amt,IE.Current_balance,IE.Blocked_points,IE.Company_id');
+		$this->db->from('igain_transaction as IT');
+		$this->db->join('igain_enrollment_master as IE','IT.Enrollement_id=IE.Enrollement_id');
+		$this->db->where('IT.Enrollement_id' , $Enrollement_id);
+		$this->db->where('IT.Company_id' , $Company_id);
+		$this->db->where('IT.Trans_type !=4 ');
+		$this->db->group_by('IT.Card_id');
+		$sql51 = $this->db->get();
+		if($sql51 -> num_rows() > 0)
+		{
+			return $sql51->result_array();
+		}
+		else
+		{
+			return false;
+		}
+	}
+/********************************************Amit end*******************************/
+
+/********************************************Akshay Start*******************************/
+	function insert_customer_notification($data)
+    {
+		$this->db->insert('igain_cust_notification', $data);
+		
+		if($this->db->affected_rows() > 0)
+		{
+			return true;
+		}		
+    }	
+	function Fetch_Seller_Referral_Offers($seller_id)
+	{
+		$this->db->select('A.Seller_id,A.Company_id,A.Referral_rule_for,B.First_name,B.Last_name,B.Current_address');
+		$this->db->from('igain_seller_refrencerule as A');		
+		$this->db->join('igain_enrollment_master as B', 'A.Seller_id = B.Enrollement_id');
+		$this->db->where(array('A.Seller_id' => $seller_id));
+		$this->db->order_by('A.refid', 'DESC');
+		$this->db->limit('1');
+		$sql = $this->db->get();
+		if($sql -> num_rows() > 0)
+		{
+			return $sql->result_array();
+		}
+		else
+		{
+			return false;
+		}		
+	}
+	
+	function Fetch_referral_offers($Seller_id,$Company_id)
+	{
+		$this->db->select("Referral_rule_for,From_date,Till_date,Refree_topup,Customer_topup");
+		$this->db->where(array('Company_id' => $Company_id,'Seller_id' => $Seller_id));		
+		$this->db->order_by('refid','DESC');
+		$query = $this->db->get('igain_seller_refrencerule');		
+		return $query->result_array();
+	}
+	function Fetch_survey_details($Company_id)
+	{
+		$this->db->select("*");
+		$this->db->where(array('Company_id' => $Company_id));
+		$query = $this->db->get('igain_questionaire_master');		
+		return $query->result_array();
+	}
+	
+	
+	function get_giftcard_details($Card_id,$Company_id)
+	{
+		$this->db->select("SUM(Card_balance) AS Gift_balance");
+		$this->db->where(array('Card_id' => $Card_id,'Company_id' => $Company_id));
+		$query = $this->db->get('igain_giftcard_tbl');		
+		if($query -> num_rows() > 0)
+		{
+			return $query->row();
+		}
+		else
+		{
+			return false;
+		}	
+	}
+	
+	/* function Insert_new_enrollment($post_enroll)
+	{	
+		$this->db->insert('igain_enrollment_master', $post_enroll);
+		if($this->db->affected_rows() > 0)
+		{
+			return true;
+		}
+	} */
+	public function insert_topup_details($data)
+	{
+		$this->db->insert('igain_transaction', $data);		
+		if($this->db->affected_rows() > 0)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	public function update_topup_billno($Seller_id,$Topup_Bill_no)
+	{
+		$data = array(
+					'Topup_Bill_no' => $Topup_Bill_no
+				);
+		$this->db->where(array('Enrollement_id' => $Seller_id));
+		$this->db->update("igain_enrollment_master", $data);
+		if($this->db->affected_rows() > 0)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	public function update_seller_balance($Seller_id,$Total_seller_bal)
+	{
+		$Sellerdata20 = array(
+					'Current_balance' => $Total_seller_bal
+				);
+		$this->db->where(array('Enrollement_id' => $Seller_id));
+		$this->db->update("igain_enrollment_master", $Sellerdata20);
+		
+		if($this->db->affected_rows() > 0)
+		{
+			return true;
+		}  
+		else
+		{
+			return false;
+		}
+	}
+	function get_hobbies_interest_details($enroll,$Company_id)
+	{
+		$this->db->select("*");
+		$this->db->where(array('HI.Enrollement_id' => $enroll,'HI.Company_id' => $Company_id));
+		$this->db->join('igain_hobbies_master as HM', 'HI.Hobbie_id = HM.Id');
+		$query = $this->db->get('igain_hobbies_interest AS HI');	
+		// echo $this->db->last_query();
+		return $query->result_array();
+	}
+	function get_all_hobbies_details()
+	{
+		$this->db->select("*");
+		$query = $this->db->get('igain_hobbies_master');	
+		// echo $this->db->last_query();
+		return $query->result_array();
+	}	
+	public function delete_hobbies($Company_id,$Enrollment_id)
+	{
+		$this->db->where(array('Company_id' => $Company_id,'Enrollement_id' => $Enrollment_id));
+		$this->db->delete('igain_hobbies_interest');
+		if($this->db->affected_rows() > 0)
+		{
+			return true;
+		}
+		
+	}
+	public function insert_hobbies($Company_id,$Enrollment_id,$new_hobbies)
+	{
+		$insert_hobbie = array(
+					'Company_id' => $Company_id,
+					'Enrollement_id' => $Enrollment_id,
+					'Hobbie_id' => $new_hobbies
+				);
+		$this->db->insert('igain_hobbies_interest',$insert_hobbie);
+		if($this->db->affected_rows() > 0)
+		{
+			return true;
+		}
+		
+	}
+	
+	
+/********************************************Amit end*******************************/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+?>

@@ -1,0 +1,68 @@
+<?php $this->load->view('front/header/header'); ?>
+    <?php 
+        $Photograph=$Enroll_details->Photograph;
+	
+	
+	   //echo "----Photograph-----".$Photograph."---<br>";
+
+        if($Photograph=="")
+        {
+            $Photograph=base_url()."assets/brand-0/images/user2.svg";
+
+        } else {
+
+            $Photograph=$this->config->item('base_url2').$Photograph;
+
+        }
+    ?>
+    <div class="custom-body">
+        <br>
+			<div class="accout-user">
+			<a href="<?php echo base_url();?>index.php/Cust_home/Upload_img">
+				<img src="<?php echo $Photograph; ?>" class="user_img"/>
+			</a>
+				<p><br/><b><?php echo ucwords($Enroll_details->First_name).' '.ucwords($Enroll_details->Last_name); ?></b></p>
+			</div>
+			<?php
+			if(@$this->session->flashdata('error_code'))
+			{
+			?>
+				<div id="msgBox" class="alert bg-warning alert-dismissible" role="alert" style="background-color: #158071 !important;">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h6 class="form-label" style="color: white;"><?php echo $this->session->flashdata('error_code'); ?></h6>
+				</div> <br>
+			<?php
+			} ?>
+			<div class="user_detail_link">
+				<ul>
+					<!--<li>
+						<a href="<?php echo base_url();?>index.php/Cust_home/profile">
+							<span class="icon"><img src="<?php echo base_url(); ?>assets/brand-0/images/pen.svg"/></span>
+							Edit Profile
+						</a>
+					</li>-->
+					<li>
+						<a href="<?php echo base_url();?>index.php/Cust_home/account">
+							<span class="icon"><img src="<?php echo base_url(); ?>assets/brand-0/images/corg.svg"/></span>
+							Account Settings
+						</a>
+					</li>
+					<li>
+						<a href="<?php echo base_url();?>index.php/Cust_home/statement">
+							<span class="icon"><img src="<?php echo base_url(); ?>assets/brand-0/images/form.svg"/></span>
+							Points History
+						</a>
+					</li>
+					<li>
+						<a href="<?php echo base_url();?>index.php/Cust_home/mailbox">
+							<span class="icon"><img src="<?php echo base_url(); ?>assets/brand-0/images/bell.svg"/></span>
+							Notifications
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		
+<?php $this->load->view('front/header/footer');  ?>

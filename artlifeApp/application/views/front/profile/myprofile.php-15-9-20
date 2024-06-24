@@ -1,0 +1,54 @@
+<?php $this->load->view('front/header/header'); ?>
+    <?php 
+        $Photograph=$Enroll_details->Photograph;
+	
+	
+	   //echo "----Photograph-----".$Photograph."---<br>";
+
+        if($Photograph=="")
+        {
+            $Photograph=base_url()."assets/brand-0/images/user2.svg";
+
+        } else {
+
+            $Photograph=$this->config->item('base_url2').$Photograph;
+
+        }
+    ?>
+    <div class="custom-body">
+        <br>
+			<div class="accout-user">
+				<img src="<?php echo $Photograph; ?>" class="user_img"/>
+				<p>Hello!<br/><b><?php echo $Enroll_details->First_name.' '.$Enroll_details->Last_name; ?></b></p>
+			</div>
+			<div class="user_detail_link">
+				<ul>
+					<li>
+						<a href="#">
+							<span class="icon"><img src="<?php echo base_url(); ?>assets/brand-0/images/pen.svg"/></span>
+							Edit Profile
+						</a>
+					</li>
+					<li>
+						<a href="#">
+							<span class="icon"><img src="<?php echo base_url(); ?>assets/brand-0/images/corg.svg"/></span>
+							Account Settings
+						</a>
+					</li>
+					<li>
+						<a href="#">
+							<span class="icon"><img src="<?php echo base_url(); ?>assets/brand-0/images/form.svg"/></span>
+							Points History
+						</a>
+					</li>
+					<li>
+						<a href="#">
+							<span class="icon"><img src="<?php echo base_url(); ?>assets/brand-0/images/bell.svg"/></span>
+							Notifications
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		
+<?php $this->load->view('front/header/footer');  ?>

@@ -1,0 +1,17 @@
+Virtus Question
+1.what pm2 
+2.diff bwt pk and uk
+3.diff  bet myisamm and innodb
+4.what magic methods 
+5.what is access specifier
+6.how to prevent to stop to use inheritance class
+7.query for empty table 
+8.what is relationship database mgmt
+9.method overloading and overriding
+10. diff json and xml
+11. what is polimorphism
+12. what is sql injection and prevent to them
+13. Design Principle
+14. What is Stored Procedures and how to use it
+14. What is use of mysqli_real_escape_string
+14. What is  Web Application Firewalls (WAFs)  and how to implement it 

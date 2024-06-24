@@ -1,0 +1,23 @@
+@media (max-width:767px){
+.login-box {
+    padding: 0 30px;
+    margin: 0 auto 0;
+}
+p {
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+html .container {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+
+
+
+
+
+
+
+
+}

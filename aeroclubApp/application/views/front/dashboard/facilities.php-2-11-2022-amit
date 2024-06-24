@@ -1,0 +1,102 @@
+<?php $this->load->view('front/header/header'); ?>
+    <header>
+        <div class="container">
+            <div class="row">
+                 <div class="col-12 d-flex justify-content-between align-items-center hedMain">
+                    <div class="leftRight"><button onclick="location.href = '<?php echo base_url(); ?>index.php/Cust_home/front_home';"><img src="<?php echo base_url(); ?>assets/img/back-icon.svg"></button></div>
+                    <div><h1>Other Facilities</h1></div>
+                    <div class="leftRight">&nbsp;</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+<main class="padTop padBottom">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 aeroFacilitiesWrapper">
+                <p class="mb-4">Bar & Restaurant, Private Events and Conference Facilities, Squash Court, Fitness Centre, Swimming Pool, Children Play Area.</p>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+        <div class="col-12">
+            <div class="accordion" id="accordionExample">
+                <div class="card">
+                  <div class="img"><img class="mr-2" src="<?php echo base_url(); ?>assets/img/img1.jpg"></div>
+                  <div class="card-head" id="headingOne">
+                    <h2 class="mb-0 collapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        <img class="mr-2" src="<?php echo base_url(); ?>assets/img/swimming-icon.svg"> Swimming Pool
+                    </h2>
+                  </div>
+              
+                  <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+                    <div class="card-body">
+                        Enjoy a swim or relax around the pool. orem Ipsum is simply dummy text of the printing and typesetting industry. orem Ipsum is simply dummy text of the printing and typesetting industry. 
+                    </div>
+                  </div>
+                </div>
+    
+                <div class="card">
+                  <div class="img"><img class="mr-2" src="<?php echo base_url(); ?>assets/img/ACEA_Gym_06_2019_800x600.jpg"></div>
+                  <div class="card-head" id="headingTwo">
+                    <h2 class="mb-0 collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                        <img class="mr-2" src="<?php echo base_url(); ?>assets/img/gym-icon.svg"> Gym
+                    </h2>
+                  </div>
+                  <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+                    <div class="card-body">
+                      Gym
+                    </div>
+                  </div>
+                </div>
+    
+                <div class="card">
+                  <div class="img"><img class="mr-2" src="<?php echo base_url(); ?>assets/img/ACEA_Loung_Refurb.jpg"></div>
+                  <div class="card-head" id="headingThree">
+                    <h2 class="mb-0 collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        <img class="mr-2" src="<?php echo base_url(); ?>assets/img/probyn-bar-icon.svg"> Daddy Probyn Bar
+                    </h2>
+                  </div>
+                  <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+                    <div class="card-body">
+                      Daddy Probyn Bar
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div class="img"><img class="mr-2" src="<?php echo base_url(); ?>assets/img/ACEA_Lounge_Refurb2.jpg"></div>
+                  <div class="card-head" id="headingThree">
+                    <h2 class="mb-0 collapsed" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                        <img class="mr-2" src="<?php echo base_url(); ?>assets/img/members-lounge-icon.svg"> Members Lounge
+                    </h2>
+                  </div>
+                  <div id="collapseFour" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+                    <div class="card-body">
+                      Members Lounge
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div class="img"><img class="mr-2" src="<?php echo base_url(); ?>assets/img/img1.jpg"></div>
+                  <div class="card-head" id="headingThree">
+                    <h2 class="mb-0 collapsed" data-toggle="collapse" data-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                        <img class="mr-2" src="<?php echo base_url(); ?>assets/img/restaurant-deck-icon.svg"> Restaurant Deck & Gardens
+                    </h2>
+                  </div>
+                  <div id="collapseFive" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+                    <div class="card-body">
+                      Restaurant Deck & Gardens
+                    </div>
+                  </div>
+                </div>
+    
+              </div>
+        </div>
+        </div>
+        </div>
+</main>
+<?php $this->load->view('front/header/footer'); ?>

@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="">
+<head>
+    <!-- Required meta tags -->
+    <!--<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">-->
+
+    <meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Artlife</title>
+   
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="<?php echo base_url(); ?>assets/brand-0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="<?php echo base_url(); ?>assets/brand-0/css/owl.carousel.min.css">
+    
+    
+    <?php 
+
+
+    /* if ($_SESSION['brndID']==1 && $this->router->fetch_method() != "myprofile") { //artcafe
+    ?>
+	
+		<!-- Custome CSS -->
+    	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/artcaffe/css/style.css">
+		<!-- Fonts CSS -->
+        <link rel="stylesheet" href="<?php echo base_url(); ?>assets/artcaffe/font/font.css">        
+        <!-- Artcaffe CSS -->
+        <link rel="stylesheet" href="<?php echo base_url(); ?>assets/artcaffe/css/style-artcaffe.css">
+	
+	<?php } else if ($_SESSION['brndID']==2 && $this->router->fetch_method() != "myprofile") { //shiba
+    ?>
+	
+		<!-- Custome CSS -->
+    	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/shiba/css/style.css">
+		<!-- Fonts CSS -->
+        <link rel="stylesheet" href="<?php echo base_url(); ?>assets/shiba/font/font.css">
+        <!-- shiba CSS -->
+        <link rel="stylesheet" href="<?php echo base_url(); ?>assets/shiba/css/style-shiba.css">
+	
+	
+    <?php } else if ($_SESSION['brndID']==3 && $this->router->fetch_method() != "myprofile") { //urban
+    ?>
+	
+		<!-- Custome CSS -->
+    	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/urban/css/style.css">
+		<!-- Fonts CSS -->
+        <link rel="stylesheet" href="<?php echo base_url(); ?>assets/urban/font/font.css">
+        <!-- urban CSS -->
+        <link rel="stylesheet" href="<?php echo base_url(); ?>assets/urban/css/style-urban.css">
+	
+	
+    <?php } else if ($_SESSION['brndID']==4 && $this->router->fetch_method() != "myprofile") { //ohcha
+    ?>
+	
+		<!-- Custome CSS -->
+    	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/ohcha/css/style.css">
+		<!-- Fonts CSS -->
+        <link rel="stylesheet" href="<?php echo base_url(); ?>assets/ohcha/font/font.css">
+        <!-- ohcha CSS -->
+        <link rel="stylesheet" href="<?php echo base_url(); ?>assets/ohcha/css/style-ohcha.css">	
+	
+    <?php } else if ($_SESSION['brndID']==5  && $this->router->fetch_method() != "myprofile") { //tapas
+        ?>
+
+        <!-- Custome CSS -->
+    	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/tapas/css/style.css">
+	
+		<!-- Fonts CSS -->
+        <link rel="stylesheet" href="<?php echo base_url(); ?>assets/tapas/font/font.css">
+        <!-- tapas CSS -->
+        <link rel="stylesheet" href="<?php echo base_url(); ?>assets/tapas/css/style-tapas.css">	
+	
+	<?php } else if ($_SESSION['brndID']==6 && $this->router->fetch_method() != "myprofile") { //style-dormans    
+    ?>
+	
+		<!-- Custome CSS -->
+    	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/dormans/css/style.css">
+		<!-- Fonts CSS -->
+        <link rel="stylesheet" href="<?php echo base_url(); ?>assets/dormans/font/font.css">
+        <!-- dormans CSS -->
+        <link rel="stylesheet" href="<?php echo base_url(); ?>assets/dormans/css/style-dormans.css">	
+	
+	<?php } else 
+	*/ 
+	if ($_SESSION['brndID'] && $this->router->fetch_method() != "myprofile" && $this->router->fetch_method() != "profile" && $this->router->fetch_method() != "account" && $this->router->fetch_method() != "changepassword"  && $this->router->fetch_method() != "profile" && $this->router->fetch_method() != "settings" ) { //style-dormans    
+    ?>
+	
+		<!-- Custome CSS -->
+    	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/brand-<?php echo $_SESSION['brndID']; ?>/css/style.css">
+		<!-- Fonts CSS -->
+        <link rel="stylesheet" href="<?php echo base_url(); ?>assets/brand-<?php echo $_SESSION['brndID']; ?>/font/font.css">
+        <!-- dormans CSS -->
+        <link rel="stylesheet" href="<?php echo base_url(); ?>assets/brand-<?php echo $_SESSION['brndID']; ?>/css/style-<?php echo $_SESSION['brndID']; ?>.css">	
+	
+	<?php } else { //artlife 
+    ?>
+
+    	<!-- Custome CSS -->
+    	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/brand-0/css/style.css">
+	
+		<!-- Fonts CSS -->
+        <link rel="stylesheet" href="<?php echo base_url(); ?>assets/brand-0/font/font.css">
+        <!-- artlife CSS -->
+        <link rel="stylesheet" href="<?php echo base_url(); ?>assets/brand-0/css/style.css">	
+    
+	<?php }  ?>    
+    
+
+    <!-- Responsive CSS -->
+    <link rel="stylesheet" href="<?php echo base_url(); ?>assets/brand-0/css/responsive.css">
+	
+	
+	
+</head>
+<?php 
+     $Current_point_balance = ($Enroll_details->Total_balance-$Enroll_details->Debit_points);
+
+	if($Current_point_balance<0){
+		$Current_point_balance=0;
+	}else{
+		$Current_point_balance=$Current_point_balance;
+	}
+
+	$total_gain_points=$total_gain_points->Total_gained_points;
+	if($total_gain_points){
+		$TotalGainPoints=$total_gain_points; 
+	}else{
+		$TotalGainPoints=0;
+	}	
+	$Total_Transfer_points=$Total_transfer->Total_Transfer_points;
+	
+	if($Total_Transfer_points){
+		$Total_Transfer_points=$Total_transfer->Total_Transfer_points;
+	}else{
+		$Total_Transfer_points=0;
+	}
+
+    $Photograph=$Enroll_details->Photograph;
+	
+	
+	//echo "----Photograph-----".$Photograph."---<br>";
+	
+	if($Photograph=="")
+	{
+            $Photograph=base_url()."assets/img/user2.svg";
+		
+	} else {
+		
+		$Photograph=$this->config->item('base_url2').$Photograph;
+		
+	}
+?>
+    <body>
+	<div id="wrapper">
+		<header>
+			<button class="toggle-menu">
+				<span></span>
+				<span></span>
+				<span></span>
+			</button>
+			<?php 
+			
+			// echo $_SESSION['brndID'];
+			if($_SESSION['brndID'] && $this->router->fetch_method() != "myprofile" && $this->router->fetch_method() != "profile" && $this->router->fetch_method() != "account" && $this->router->fetch_method() != "changepassword"  && $this->router->fetch_method() != "profile" && $this->router->fetch_method() != "settings"  )  { ?>
+			<div class="logo">
+               <?php if($_SESSION['brndID'] != 0 ){ ?>
+                
+					 <a href="#"><img src="<?php echo base_url(); ?>assets/brand-<?php echo $_SESSION['brndID']; ?>/logo/logo.png"/></a>
+				   
+                
+                <?php } else { ?>
+                	
+                       <a href="#"><img src="<?php echo base_url(); ?>assets/brand-0/logo/logo.png"/></a>
+                 <?php } ?>
+			</div>
+			<?php } else { ?>
+				
+				<div class="logo">
+					<a href="#"><img src="<?php echo base_url(); ?>assets/brand-0/logo/logo.png"/></a>
+				</div>
+				
+				
+			<?php } ?>
+			
+			<div class="user-right">
+			<?php echo $Enroll_details->First_name.' '.$Enroll_details->Last_name; ?>
+			</div>
+			<nav>
+				<div class="user_dtc">
+					<button class="toggle-back"></button>
+					<img src="<?php echo $Photograph; ?>" class="user_avtar"/>
+					<h4><?php echo $Enroll_details->First_name.' '.$Enroll_details->Last_name; ?></h4>
+					<p><?php echo $User_email_id; ?></p>
+				</div>
+				<ul>
+					<li><a href="<?php echo base_url(); ?>index.php/Cust_home/myprofile">My Account</a></li>
+					<li><a href="<?php echo base_url(); ?>index.php/Cust_home/works">How It Works</a></li>
+				</ul>
+                <?php if($_SESSION['brndID'] != 0 ){ ?>
+                    <ul class="ul_light">
+                        <li><a href="<?php echo base_url(); ?>index.php/Shopping/select_outlet_shopping">Find a Store</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="<?php echo base_url(); ?>index.php/Cust_home/front_home">View All Bands</a></li>
+                    </ul>
+                <?php } ?>
+			</nav>
+            
+		</header>
