@@ -15,14 +15,22 @@ class Auto_Process_meal_topup extends CI_Controller
 	}
 	public function index()
 	{
-		$Company_details = $this->Auto_process_model->Fetch_Meal_Company();
-		$Todays_date=date("m-d");
+		echo "<br>".date_default_timezone_get();
+		$Todays_date=date("d H:i:s");
+		echo "<br>$Todays_date";
+		if($Todays_date >= "01 05:00:00")
+		{
+			echo "<br>Don't Run !!!!";
+			die;
+		}
+		
 		if ($this->agent->is_browser())
 		{
 				$agent = $this->agent->browser().' '.$this->agent->version();
 				echo $agent;
 				die;
 		}
+		$Company_details = $this->Auto_process_model->Fetch_Meal_Company();
 		foreach($Company_details as $Company_Records)
 		{
 			// echo "Inside";die;

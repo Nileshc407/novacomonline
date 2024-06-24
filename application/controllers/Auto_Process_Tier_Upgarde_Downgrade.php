@@ -12,10 +12,16 @@ class Auto_Process_Tier_Upgarde_Downgrade extends CI_Controller
 		$this->load->model('Igain_model');
 		$this->load->library('Send_notification');
 		$this->load->model('Auto_Process/Auto_process_model');
-		$this->load->model('TierM/Tier_model');
+		$this->load->library('user_agent');
 	}
 	public function index()
 	{
+		if ($this->agent->is_browser())
+		{
+				$agent = $this->agent->browser().' '.$this->agent->version();
+				echo $agent;
+				die;
+		}
 		$Company_details = $this->Igain_model->FetchCompany();
 		$Todays_date=date("Y-m-d");
 		
@@ -24,7 +30,7 @@ class Auto_Process_Tier_Upgarde_Downgrade extends CI_Controller
 		foreach($Company_details as $Company_Records)
 		{
 							
-			if($Company_Records["Cron_tier_flag"]==1 && $Company_Records["Company_id"] == 3)
+			if($Company_Records["Cron_tier_flag"]==1)
 			{
 				/*****************Create Tier Auto Process Child********************/
 				$lv_Create_Customer_Tier_Child = $this->Auto_process_model->Create_Customer_Tier_auto_process_child();
@@ -58,21 +64,29 @@ class Auto_Process_Tier_Upgarde_Downgrade extends CI_Controller
 						{
 							$From_date = strtotime($Todays_date .' -1 months');
 							$From_date=date("Y-m-d",$From_date);
+							
+							$Months = 1;
+							
+							
 						}
 						if($Excecution_time=="Quaterly")
 						{
 							$From_date = strtotime($Todays_date .' -3 months');
 							$From_date=date("Y-m-d",$From_date);
+							$Months = 3;
 						}
 						if($Excecution_time=="Bi-Annualy")
 						{
 							$From_date = strtotime($Todays_date .' -6 months');
 							$From_date=date("Y-m-d",$From_date);
+							$Months = 6;
 						}
 						if($Excecution_time=="Yearly")
 						{
 							$From_date = strtotime($Todays_date .' -12 months');
 							$From_date=date("Y-m-d",$From_date);
+							
+							$Months = 12;
 						}
 						
 						
@@ -101,28 +115,37 @@ class Auto_Process_Tier_Upgarde_Downgrade extends CI_Controller
 						
 						echo "<br><br>Tier_name-->".$Tier_name."<-->Tier_id-->".$Tier_id."<-->Excecution_time-->".$Excecution_time."<-->From_date-->".$From_date."<-->New_Tier_level_id-->".$New_Tier_level_id."<-->Tier_criteria-->".$Tier_criteria."<-->Criteria_value-->".$Criteria_value."<-->Operator_id-->".$Operator_id;
 						
+						
 						foreach($Trans_Records31 as $Trans_Records3)
 						{
+							
 							
 							$Old_Tier_level_id=$Trans_Records3->Tier_level_id;
 							$Old_Tier_name=$Trans_Records3->Tier_name;
 							$Full_name=$Trans_Records3->First_name." ".$Trans_Records3->Last_name;
 							
+							$Total_Spend=0;
+							$Total_Transactions=0;
+							$Total_Points=0;
+							
 							if($Tier_criteria==1)//Cumulative Spend
 							{
 								$Criteria=$Trans_Records3->Total_Spend;
+								$Total_Spend=$Trans_Records3->Total_Spend;
 								$Enrollement_id=$Trans_Records3->Enrollement_id;
 								echo "<br><br><b>Total_Spend -->".$Criteria."-->Enrollement_id.".$Enrollement_id."-->Current_Tier_name.".$Old_Tier_name."</b>";
 							}
 							if($Tier_criteria==2)//Cumulative Number of Transactions
 							{
 								$Criteria=$Trans_Records3->Total_Transactions;
+								$Total_Transactions=$Trans_Records3->Total_Transactions;
 								$Enrollement_id=$Trans_Records3->Enrollement_id;
 								echo "<br><br><b>Total_Transactions -->".$Criteria."-->Enrollement_id.".$Enrollement_id."-->Current_Tier_name.".$Old_Tier_name."</b>";
 							}
 							if($Tier_criteria==3)//Cumulative Points Accumlated
 							{
 								$Criteria=$Trans_Records3->Total_Points;
+								$Total_Points=$Trans_Records3->Total_Points;
 								$Enrollement_id=$Trans_Records3->Enrollement_id;
 								echo "<br><br><b>Total_Points -->".$Criteria."-->Enrollement_id.".$Enrollement_id."-->Current_Tier_name.".$Old_Tier_name."</b>";
 							}
@@ -148,8 +171,21 @@ class Auto_Process_Tier_Upgarde_Downgrade extends CI_Controller
 									$Process="Downgrade";
 								}
 								echo "<br><b>Process -->".$Process."</b>";
+								//------------------------TIER UPDATE MANUALLY LOGIC-------------------------------
+								if($Trans_Records3->Tier_update_flag ==1 && $Process=="Downgrade" )
+								{
+									$Tier_update_date = strtotime($Trans_Records3->Tier_update_date ." +$Months months");
+									$Tier_update_date=date("Y-m-d",$Tier_update_date);
+									echo "<br>Tier_update_date ".$Tier_update_date;
+									if($Tier_update_date > $Todays_date )
+									{
+										continue;
+									}
+								}
+								//------------------------TIER UPDATE MANUALLY LOGIC END-------------------------------
+							
 								/*****************Insert Tier Auto Process Child********************/
-								$lv_Insert_Customer_Tier = $this->Auto_process_model->Insert_Customer_Tier_auto_process($Enrollement_id,$Tier_id,$Process,$Old_Tier_level_id,$New_Tier_level_id,$Old_Tier_name,$Tier_name);
+								$lv_Insert_Customer_Tier = $this->Auto_process_model->Insert_Customer_Tier_auto_process($Enrollement_id,$Tier_id,$Process,$Old_Tier_level_id,$New_Tier_level_id,$Old_Tier_name,$Tier_name,$Total_Spend,$Total_Transactions,$Total_Points);
 								/*********************************************************************/
 							}
 						}
@@ -167,7 +203,7 @@ class Auto_Process_Tier_Upgarde_Downgrade extends CI_Controller
 								$lv_Update_Customer_Tier = $this->Auto_process_model->Update_Customer_Tier($Rec_tier->Enrollement_id,$Rec_tier->Tier_id);
 								/********************************************************************/
 								/*****************Insert Tier Auto Process lOG********************/
-								$lv_Insert_Customer_TierLOG = $this->Auto_process_model->Insert_Customer_Tier_auto_process_log($Company_id,$Rec_tier->Enrollement_id,$Rec_tier->Tier_id,$Rec_tier->Process,$Rec_tier->Old_Tier_level_id,$Rec_tier->New_Tier_level_id,$Rec_tier->Old_Tier_name,$Rec_tier->Tier_name);
+								$lv_Insert_Customer_TierLOG = $this->Auto_process_model->Insert_Customer_Tier_auto_process_log($Company_id,$Rec_tier->Enrollement_id,$Rec_tier->Tier_id,$Rec_tier->Process,$Rec_tier->Old_Tier_level_id,$Rec_tier->New_Tier_level_id,$Rec_tier->Old_Tier_name,$Rec_tier->Tier_name,$Rec_tier->Cumulative_Spend,$Rec_tier->Cumulative_Trans,$Rec_tier->Cumulative_Points_Accumlated);
 								/*********************************************************************/
 								
 									echo "<br><b>Tier_id -->".$Rec_tier->Tier_id."<-->Old_Tier_name -->".$Rec_tier->Old_Tier_name."<-->New Tier_name -->".$Rec_tier->Tier_name."<-->Enrollement_id -->".$Rec_tier->Enrollement_id."<-->Process -->".$Rec_tier->Process."</b>";

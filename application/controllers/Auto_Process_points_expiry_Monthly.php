@@ -1,7 +1,7 @@
 <?php //if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
  
-class Auto_Process_points_expiry extends CI_Controller 
+class Auto_Process_points_expiry_Monthly extends CI_Controller 
 {
 	public function __construct()
 	{
@@ -9,13 +9,18 @@ class Auto_Process_points_expiry extends CI_Controller
 		$this->load->library('form_validation');		
 		$this->load->database();
 		$this->load->helper('url');
-		$this->load->model('Igain_model');
 		$this->load->library('Send_notification');
-		$this->load->model('Report/Report_model');
 		$this->load->model('Auto_Process/Auto_process_model');
+		$this->load->library('user_agent');
 	}
 	public function index()
 	{
+		if ($this->agent->is_browser())
+		{
+				$agent = $this->agent->browser().' '.$this->agent->version();
+				echo $agent;
+				die;
+		}
 		$Company_details = $this->Auto_process_model->FetchCompanyCronFlag($CronFlag='Cron_points_expiry_flag',$Flag=1);
 		$Todays_date=date("m-d");
 		
@@ -24,7 +29,10 @@ class Auto_Process_points_expiry extends CI_Controller
 			
 			echo "<br><br><br><b>Company Name --->".$Company_Records["Company_name"]."<--->Points_expiry_period --->".$Company_Records["Points_expiry_period"]."</b>";
 			
-			
+			if($Company_Records["Company_id"] != '7')// JAVA LIVE
+			{
+				continue;
+			}
 			//-----------------------  Flow 1 : Aggregation of Points Gained
 			$Trans_Records1 = $this->Auto_process_model->get_cust_gained_points_trans($Company_Records["Company_id"]);
 			if($Trans_Records1 != NULL)
@@ -106,8 +114,8 @@ class Auto_Process_points_expiry extends CI_Controller
 			
 			// die;
 			//-------------------------Flow 3: Logic to Expire Points----------------------------------
-			$Expiry_Summary=$this->Auto_process_model->get_cust_trans_summary_expiry($Company_Records["Company_id"]);
-			// print_r($data["Expiry_Summary"]);
+			$Expiry_Summary=$this->Auto_process_model->get_cust_trans_summary_expiry_monthly($Company_Records["Company_id"]);
+			// print_r($Expiry_Summary);
 			// die; 
 			if($Company_Records["Points_expiry_period"]!=0)
 			{
@@ -115,56 +123,32 @@ class Auto_Process_points_expiry extends CI_Controller
 				{		
 					foreach($Expiry_Summary as $Trans_Records)
 					{
-						  if($Trans_Records->Card_id != '7000000798')// Samual
+						/*   if($Trans_Records->Card_id != '7000000798')// Samual
 						{
 							continue;
-						}  
+						}   */
 						echo "<br><b>Card_id  :".$Trans_Records->Card_id."</b>";
 						
-						/******************Calculate Days*********************************************/
-						$Transaction_date=date("m-d-Y",strtotime($Trans_Records->Trans_date));
-						$tUnixTime = time();
-						list($month, $day, $year) = EXPLODE('-', $Transaction_date);
-						$timeStamp = mktime(0, 0, 0, $month, $day, $year);
-						$num_days= ceil(abs($timeStamp - $tUnixTime) / 86400);
-						////*************************************************************************/
 						$Full_name=$Trans_Records->First_name." ".$Trans_Records->Last_name;
 						$Enrollement_id=$Trans_Records->Enrollement_id;
 						$Company_id=$Company_Records["Company_id"];
-						$Company_website=$Company_Records["Website"];
 						$Points_expiry_notification=$Company_Records["Points_expiry_notification"];
 						// $Current_balance=$Trans_Records->Current_balance;
 						// $Total_Current_balance=($Trans_Records->Current_balance-$Trans_Records->Blocked_points);
 						
-						$Expire_pts=($Trans_Records->Total_topup_amount + $Trans_Records->Total_loyalty_pts - $Trans_Records->Knockout_points) ;
+						$Expire_pts=($Trans_Records->Expire_pts) ;
 						
-						$Remaining_Days=$Company_Records["Points_expiry_period"]-$num_days;	
+						$Current_balance=$Trans_Records->Current_balance;
+						$Total_Current_balance=($Trans_Records->Current_balance-$Trans_Records->Blocked_points);
 						
-						$Enroll_details = $this->Auto_process_model->get_cust_enroll_details($Company_id,$Trans_Records->Card_id);
-						$Current_balance=$Enroll_details->Current_balance;
-						$Total_Current_balance=($Enroll_details->Current_balance-$Enroll_details->Blocked_points);
+						echo "<br><br><b>***************Inside**********************</b><br>*-*Expire_pts-->".$Expire_pts."*-*Card_id-->".$Trans_Records->Card_id."*-*First_name-->".$Trans_Records->First_name."-----Points_expiry_notification->".$Points_expiry_notification."*--*Total_Current_balance-->".$Total_Current_balance."<br><br>";
 						
-						echo "<br><br><b>***************Inside**********************</b><br>Trans_summ_id-->".$Trans_Records->Trans_summ_id."*-*Expire_pts-->".$Expire_pts."*-*Card_id-->".$Trans_Records->Card_id."*-*First_name-->".$Trans_Records->First_name."*--*num_days-->".$num_days."*--*Remaining_Days-->".$Remaining_Days."-----Points_expiry_notification->".$Points_expiry_notification."*--*Total_Current_balance-->".$Total_Current_balance."<br><br>";
-						
-						//-----------------Points expiry Reminder Notification-------------------
-						if($Remaining_Days==$Points_expiry_notification)
-						{
-							$Email_content = array(
-								'Days' => $Remaining_Days,
-								'Deduct_balance' => $Expire_pts,
-								'Notification_type' => 'Notification: Expiry of Loyalty Points',
-								'Template_type' => 'Points_Expiry'
-							);
-							
-							$Notification=$this->send_notification->send_Notification_email($Enrollement_id,$Email_content,'1',$Company_id);
-							
-						}
 						//---------------------Points expiry Notification----------------------------------------
-						if($num_days>=$Company_Records["Points_expiry_period"] && $Total_Current_balance > 0) 
+						if($Expire_pts>0 && $Total_Current_balance > 0) 
 						{
 							/******************Update Customer Balance*******************************/
 								
-								$Updated_Current_balance=($Enroll_details->Current_balance-$Expire_pts);
+								$Updated_Current_balance=($Trans_Records->Current_balance-$Expire_pts);
 								$result2 = $this->Auto_process_model->Update_Customer_Balance($Enrollement_id,$Updated_Current_balance);
 								
 							/****************************************************************/
@@ -173,14 +157,11 @@ class Auto_Process_points_expiry extends CI_Controller
 								
 							/****************************************************************/
 							
-							$lv_knock_pts = ($Trans_Records->Knockout_points + $Expire_pts);
-							$UpdateKnockout_points=$this->Auto_process_model->Update_Cust_Knockout_points_trans_summary($Trans_Records->Trans_summ_id,$lv_knock_pts);
-							
-							$Availabel_Current_balance=($Updated_Current_balance-$Enroll_details->Blocked_points);
+							$Availabel_Current_balance=($Updated_Current_balance-$Trans_Records->Blocked_points);
 							
 							$Email_content = array(
-								'Days' => $Remaining_Days,
-								'Deduct_balance' => $Expire_pts,
+								'Days' => 0,
+								'Deduct_balance' => round($Expire_pts),
 								'Availabel_Current_balance' => $Availabel_Current_balance,
 								'Notification_type' => 'Notification: Expiry of Loyalty Points',
 								'Template_type' => 'Points_Expiry'
@@ -195,8 +176,32 @@ class Auto_Process_points_expiry extends CI_Controller
 					}
 				}
 			}
-		
-		
+			//-------------------------Flow 4: Logic to be Expire Points----------------------------------
+			$ExpiryTOBE_Summary=$this->Auto_process_model->get_cust_trans_summary_tobe_expiry_monthly($Company_Records["Company_id"]);
+			if($ExpiryTOBE_Summary != NULL)
+				{	
+					$Points_expiry_notification=$Company_Records["Points_expiry_notification"];
+					foreach($ExpiryTOBE_Summary as $Trans_Records2)
+					{
+							
+						//-----------------Points expiry Reminder Notification-------------------
+						if($Trans_Records2->TobeExpire_pts > 0 && $Points_expiry_notification > 0)
+						{
+							$Enrollement_id=$Trans_Records2->Enrollement_id;
+							
+							
+							$Email_content = array(
+								'Days' => $Points_expiry_notification,
+								'Deduct_balance' => round($Trans_Records2->TobeExpire_pts),
+								'Notification_type' => 'Notification: Expiry of Loyalty Points',
+								'Template_type' => 'Points_Expiry'
+							);
+							
+							$Notification=$this->send_notification->send_Notification_email($Enrollement_id,$Email_content,'1',$Company_Records["Company_id"]);
+							
+						}
+					}
+				}
 	}
 }
 }	

@@ -43,14 +43,14 @@ class Auto_process_model extends CI_Model
 	}
 	function Get_Cumulative_spend_transactions($Company_id,$From_date,$Till_date)
 	{
-		$this->db->select("First_name,Last_name,E.Enrollement_id,SUM(Purchase_amount) AS Total_Spend,TM.Tier_id,Tier_name,Tier_level_id");
+		$this->db->select("First_name,Last_name,E.Enrollement_id,SUM(Purchase_amount) AS Total_Spend,TM.Tier_id,Tier_name,Tier_level_id,E.Tier_update_flag,E.Tier_update_date");
 		$this->db->from('igain_transaction as T');
 		$this->db->join('igain_enrollment_master as E','T.Enrollement_id=E.Enrollement_id');
 		$this->db->join('igain_tier_master as TM','E.Tier_id=TM.Tier_id');
 		$this->db->group_by('T.Enrollement_id');
 		$this->db->where(array('T.Company_id'=>$Company_id,'E.User_activated'=>1));
 		//$this->db->where(array('E.Tier_id'=>$Tier_id,'TM.Tier_id'=>$Tier_id));
-		$this->db->where("Trans_date BETWEEN '".$From_date."' AND '".$Till_date."'");
+		$this->db->where("Trans_date BETWEEN '".$From_date." 00:00:00' AND '".$Till_date." 23:59:59'");
 		
 		$sql=$this->db->get();
 		echo "<br><br>Transcation Query-->".$this->db->last_query();
@@ -66,17 +66,17 @@ class Auto_process_model extends CI_Model
 	}
 		function Get_Cumulative_Points_Accumlated($Company_id,$From_date,$Till_date)
 	{
-		$this->db->select("First_name,Last_name,E.Enrollement_id,SUM(Loyalty_pts) AS Total_Points,TM.Tier_id,Tier_name,Tier_level_id");
+		$this->db->select("First_name,Last_name,E.Enrollement_id,SUM(Loyalty_pts) AS Total_Points,TM.Tier_id,Tier_name,Tier_level_id,E.Tier_update_flag,E.Tier_update_date");
 		$this->db->from('igain_transaction as T');
 		$this->db->join('igain_enrollment_master as E','T.Enrollement_id=E.Enrollement_id');
 		$this->db->join('igain_tier_master as TM','E.Tier_id=TM.Tier_id');
 		$this->db->group_by('T.Enrollement_id');
 		$this->db->where(array('T.Company_id'=>$Company_id,'E.User_activated'=>1));
 		//$this->db->where(array('E.Tier_id'=>$Tier_id,'TM.Tier_id'=>$Tier_id));
-		$this->db->where("Trans_date BETWEEN '".$From_date."' AND '".$Till_date."'");
+		$this->db->where("Trans_date BETWEEN '".$From_date." 00:00:00' AND '".$Till_date." 23:59:59'");
 		 
 		$sql=$this->db->get();
-		echo "<br><br>Points acc Transcation Query-->".$this->db->last_query();
+		echo "<br><br>Points acc Transation Query-->".$this->db->last_query();//die;
 		if ($sql->num_rows() > 0)
 		{
         	foreach ($sql->result() as $row)
@@ -90,7 +90,7 @@ class Auto_process_model extends CI_Model
 	
 	function Get_Cumulative_Total_transactions($Company_id,$From_date,$Till_date)
 	{
-		$this->db->select("First_name,Last_name,E.Enrollement_id,COUNT(*) AS Total_Transactions,TM.Tier_id,Tier_name,Tier_level_id");
+		$this->db->select("First_name,Last_name,E.Enrollement_id,COUNT(*) AS Total_Transactions,TM.Tier_id,Tier_name,Tier_level_id,E.Tier_update_flag,E.Tier_update_date");
 		$this->db->from('igain_transaction as T');
 		$this->db->join('igain_enrollment_master as E','T.Enrollement_id=E.Enrollement_id');
 		$this->db->join('igain_tier_master as TM','E.Tier_id=TM.Tier_id');
@@ -98,7 +98,7 @@ class Auto_process_model extends CI_Model
 		$this->db->where(array('T.Company_id'=>$Company_id,'E.User_activated'=>1));
 		$this->db->where('T.Trans_type IN(2,12)');
 		//$this->db->where(array('E.Tier_id'=>$Tier_id,'TM.Tier_id'=>$Tier_id));
-		$this->db->where("Trans_date BETWEEN '".$From_date."' AND '".$Till_date."'");
+		$this->db->where("Trans_date BETWEEN '".$From_date." 00:00:00' AND '".$Till_date." 23:59:59'");
 		
 		$sql=$this->db->get();
 		 echo "<br><br>Transcation Query-->".$this->db->last_query();
@@ -172,7 +172,7 @@ class Auto_process_model extends CI_Model
 		$this->db->where('Enrollement_id',$Enrollement_id);
 		$this->db->update('igain_enrollment_master',array('Current_balance'=>$Current_balance));
 		
-		//echo $this->db->last_query();
+		echo '<br><br>'.$this->db->last_query();
 		if($this->db->affected_rows() > 0)
 		{
 			return true;
@@ -201,13 +201,27 @@ class Auto_process_model extends CI_Model
 		//**************** AMIT work START 01-06-2016 *****************************************************/
 	public function Insert_points_expiry_trans($Company_id,$Enrollement_id,$Expired_points,$Card_id)
     {
-		$Trans_date=date("Y-m-d");
+		$characters = '12345678';
+		$string = '';
+		$Bill_no="";
+		for ($i = 0; $i < 8; $i++) 
+		{
+			$Bill_no .= $characters[mt_rand(0, strlen($characters) - 1)];
+		}
+		if($Company_id==7)//JAVA
+		{
+			$data['Seller'] = 1023;
+		}
+		$Trans_date=date("Y-m-d H:i:s");
 		$data['Company_id'] = $Company_id;
 		$data['Enrollement_id'] = $Enrollement_id;        
 		$data['Trans_type'] = 14;        //Points Expiry
 		$data['Card_id'] = $Card_id;        
 		$data['Expired_points'] = $Expired_points;        
-		$data['Trans_date'] = $Trans_date;        
+		// $data['Trans_date'] = '2024-04-01 00:00:00'; 
+		$data['Trans_date'] = date('Y-m-d H:i:s'); 
+		$data['Bill_no'] = $Bill_no;        
+		$data['Manual_billno'] = $Bill_no;        
 		$this->db->insert('igain_transaction', $data);		
 		if($this->db->affected_rows() > 0)
 		{
@@ -470,7 +484,7 @@ class Auto_process_model extends CI_Model
 	}
 //**************** sandeep work end *****************************************************/	
 	/******AMIT 19-04-2017***********************/
-	public function Insert_Customer_Tier_auto_process($Enrollement_id,$Tier_id,$Process,$Old_Tier_level_id,$New_Tier_level_id,$Old_Tier_name,$Tier_name)
+	public function Insert_Customer_Tier_auto_process($Enrollement_id,$Tier_id,$Process,$Old_Tier_level_id,$New_Tier_level_id,$Old_Tier_name,$Tier_name,$Total_Spend,$Total_Transactions,$Total_Points)
 	{
 		$data['Enrollement_id'] = $Enrollement_id;  
 		$data['Process'] = $Process;	
@@ -478,7 +492,11 @@ class Auto_process_model extends CI_Model
 		$data['New_Tier_level_id'] = $New_Tier_level_id; 
 		$data['Tier_name'] = $Tier_name;   		
 		$data['Old_Tier_level_id'] = $Old_Tier_level_id;        
-		$data['Old_Tier_name'] = $Old_Tier_name;        
+		$data['Old_Tier_name'] = $Old_Tier_name;   
+		$data['Cumulative_Trans'] = $Total_Transactions;        
+		$data['Cumulative_Spend'] = $Total_Spend;        
+		$data['Cumulative_Points_Accumlated'] = $Total_Points;    	
+		
 		     
 		$this->db->insert('igain_customer_tier_auto_process_child', $data);		
 		
@@ -487,7 +505,7 @@ class Auto_process_model extends CI_Model
 			return true;
 		}
 	}
-	public function Insert_Customer_Tier_auto_process_log($Company_id,$Enrollement_id,$Tier_id,$Process,$Old_Tier_level_id,$New_Tier_level_id,$Old_Tier_name,$Tier_name)
+	public function Insert_Customer_Tier_auto_process_log($Company_id,$Enrollement_id,$Tier_id,$Process,$Old_Tier_level_id,$New_Tier_level_id,$Old_Tier_name,$Tier_name,$Total_Spend,$Total_Transactions,$Total_Points)
 	{
 		$data['Company_id'] = $Company_id;  
 		$data['Enrollement_id'] = $Enrollement_id;  
@@ -496,7 +514,10 @@ class Auto_process_model extends CI_Model
 		$data['New_Tier_level_id'] = $New_Tier_level_id; 
 		$data['Tier_name'] = $Tier_name;   		
 		$data['Old_Tier_level_id'] = $Old_Tier_level_id;        
-		$data['Old_Tier_name'] = $Old_Tier_name;        
+		$data['Old_Tier_name'] = $Old_Tier_name; 
+		$data['Cumulative_Trans'] = $Total_Transactions;        
+		$data['Cumulative_Spend'] = $Total_Spend;        
+		$data['Cumulative_Points_Accumlated'] = $Total_Points;        	
 		$data['Update_date'] = date("Y-m-d H:i:s");        
 		     
 		$this->db->insert('igain_customer_tier_auto_process_log', $data);		
@@ -526,6 +547,9 @@ class Auto_process_model extends CI_Model
 						'Tier_name' => array('type' => 'VARCHAR','constraint' => '50'),
 						'Old_Tier_level_id' => array('type' => 'INT','constraint' => '11'),
 						'Old_Tier_name' => array('type' => 'VARCHAR','constraint' => '50'),
+						'Cumulative_Trans' => array('type' => 'INT','constraint' => '11'),
+						'Cumulative_Spend' => array('type' => 'DECIMAL','constraint' => '25,2'),
+						'Cumulative_Points_Accumlated' => array('type' => 'INT','constraint' => '11'),
 						
 					);
 		$this->dbforge->add_key('Auto_id', TRUE);			
@@ -545,7 +569,11 @@ class Auto_process_model extends CI_Model
 						'Tier_name' => array('type' => 'VARCHAR','constraint' => '50'),
 						'Old_Tier_level_id' => array('type' => 'INT','constraint' => '11'),
 						'Old_Tier_name' => array('type' => 'VARCHAR','constraint' => '50'),
+						'Cumulative_Trans' => array('type' => 'INT','constraint' => '11'),
+						'Cumulative_Spend' => array('type' => 'DECIMAL','constraint' => '25,2'),
+						'Cumulative_Points_Accumlated' => array('type' => 'INT','constraint' => '11'),
 						'Update_date' => array('type' => 'DATETIME'),
+						
 					);
 		$this->dbforge->add_key('Auto_id', TRUE);			
 		$this->dbforge->add_field($fields2);		
@@ -556,7 +584,7 @@ class Auto_process_model extends CI_Model
 	public function Get_Customer_Tier_auto_process()
 	{
 		// $this->db->from('igain_customer_tier_auto_process_child');			
-		$sql1=$this->db->query('select a.`Enrollement_id`,a.`Tier_id`,a.Process,a.Tier_name,a.Old_Tier_name,b.`New_Tier_level_id`,b.`Old_Tier_level_id` FROM `igain_customer_tier_auto_process_child` as a Inner join `igain_customer_tier_auto_process_child` as b ON a.New_Tier_level_id = b.New_Tier_level_id where a.`New_Tier_level_id` IN (SELECT max(`New_Tier_level_id`) FROM `igain_customer_tier_auto_process_child` where `Enrollement_id`=a.`Enrollement_id`) group by `Enrollement_id`');			
+		$sql1=$this->db->query('select a.`Enrollement_id`,a.`Tier_id`,a.Process,a.Tier_name,a.Old_Tier_name,b.`New_Tier_level_id`,b.`Old_Tier_level_id`,a.Cumulative_Spend,a.Cumulative_Trans,a.Cumulative_Points_Accumlated FROM `igain_customer_tier_auto_process_child` as a Inner join `igain_customer_tier_auto_process_child` as b ON a.New_Tier_level_id = b.New_Tier_level_id where a.`New_Tier_level_id` IN (SELECT max(`New_Tier_level_id`) FROM `igain_customer_tier_auto_process_child` where `Enrollement_id`=a.`Enrollement_id`) group by `Enrollement_id`');			
 		//$sql1 = $this->db->get();
 		
 		//echo $this->db->last_query();
@@ -1012,6 +1040,270 @@ class Auto_process_model extends CI_Model
 		{
 			return 0;
 		}	
+	}
+	function FetchCompanyCronFlag($CronFlag,$Flag)
+	{
+		$company_sql = $this->db->query("Select * from igain_company_master where $CronFlag=$Flag AND  Activated=1");
+		$company_result = $company_sql->result_array();
+		// echo $this->db->last_query();DIE;
+		if($company_sql->num_rows() > 0)
+		{
+			return $company_result;
+		}
+		else
+		{
+			return 0;
+		}
+		
+	}
+	function get_cust_gained_points_trans($Company_id)
+	{
+		$this->db->select('Trans_id,Company_id,Trans_type,Trans_date,T.Enrollement_id,T.Card_id,Bill_no,Manual_billno,SUM(Purchase_amount) AS Total_purchase_amount,SUM(Paid_amount) AS Total_paid_amount,SUM(Redeem_points) AS Total_Redeemed_points,SUM(Loyalty_pts) AS Total_loyalty_pts,SUM(Topup_amount) AS Total_Topup_amount');
+		$this->db->from('igain_transaction as T');
+		$this->db->where(array('T.Company_id'=>$Company_id,'T.Post_to_summary_flag'=>0));
+	/*Remove later*/	//$this->db->where("Trans_date BETWEEN '2024-03-01 00:00:00' AND '2024-04-01 00:00:00'");
+		$this->db->where('Trans_type IN (1,2,3,10,12)');
+		//$this->db->where("Card_id IN ('7000001273','7000001292','7000001302','7000001317','7000001357','7000001367','7000001421','7000001458','7000001548','7000001630','7000001692','7000001701','7000001709','7000001848','7000001972','7000001999','7000002022','7000002070','7000002323')");
+		$this->db->group_by('Bill_no');
+		$this->db->group_by('Card_id');
+		$this->db->order_by('Trans_id','asc');
+		$sql=$this->db->get();
+		echo "<br><br>get_cust_gained_points_trans Query-->".$this->db->last_query();//die;
+		if($sql->num_rows()>0)
+		{
+			return $sql->result_array();
+		}
+		else
+		{
+			return false;
+		}	
+		
+			
+	}
+	public function Insert_transaction_summary($Insertdata)
+    {       
+		$this->db->insert('igain_transaction_summary', $Insertdata);		
+		if($this->db->affected_rows() > 0)
+		{
+			return true;
+		}
+    }
+	public function Update_Cust_trans_summary($Company_id,$Enrollement_id,$Bill_no)
+	{
+		$this->db->where('Company_id',$Company_id);
+		$this->db->where('Enrollement_id',$Enrollement_id);
+		$this->db->where('Bill_no',$Bill_no);
+		$this->db->update('igain_transaction',array('Post_to_summary_flag'=>1));
+		
+		//echo $this->db->last_query();
+		if($this->db->affected_rows() > 0)
+		{
+			return true;
+		}
+		else
+		{
+			return 0;
+		}	
+	}
+	
+	function get_cust_redeem_points_trans_summary($Company_id)
+	{
+		$this->db->select('Trans_summ_id,Company_id,T.Enrollement_id,T.Card_id,Bill_no,Total_Redeemed_points');
+		$this->db->from('igain_transaction_summary as T');
+		
+		$this->db->where(array('T.Company_id'=>$Company_id));
+		$this->db->where('Total_Redeemed_points > 0 AND Redeemed_picked =0');
+		$this->db->order_by('Trans_summ_id','asc');
+		$sql=$this->db->get();
+		echo "<br><br>get_cust_redeem_points_trans_summary Query-->".$this->db->last_query();//die;
+		if($sql->num_rows()>0)
+		{
+			return $sql->result_array();
+		}
+		else
+		{
+			return false;
+		}	
+	}
+		function get_cust_gained_points_trans_summary($Enrollement_id)
+	{
+		$this->db->select('Trans_summ_id,Company_id,T.Enrollement_id,T.Card_id,Bill_no,Total_topup_amount,Total_loyalty_pts,Knockout_points');
+		$this->db->from('igain_transaction_summary as T');
+		
+		$this->db->where(array('T.Enrollement_id'=>$Enrollement_id));
+		$this->db->where('(Total_topup_amount + Total_loyalty_pts) != Knockout_points');
+		$this->db->where('Trans_type IN (1,2,12)');
+		$this->db->order_by('Trans_summ_id','asc');
+		$sql=$this->db->get();
+		 echo "<br><br>get_cust_gained_points_trans_summary Query-->".$this->db->last_query();//die;
+		if($sql->num_rows()>0)
+		{
+			return $sql->result_array();
+		}
+		else
+		{
+			return false;
+		}	
+		
+			
+	}
+		function get_cust_trans_summary_expiry($Company_id)
+	{
+		$this->db->select('Trans_summ_id,Trans_type,T.Company_id,T.Enrollement_id,T.Card_id,First_name,Last_name,Current_balance,Blocked_points,Bill_no,Total_topup_amount,Total_loyalty_pts,Knockout_points,Total_Redeemed_points,Trans_date');
+		$this->db->from('igain_transaction_summary as T');
+		$this->db->join('igain_enrollment_master as E','T.Enrollement_id=E.Enrollement_id');
+		$this->db->where(array('T.Company_id'=>$Company_id));
+		$this->db->where('(Total_topup_amount + Total_loyalty_pts) != Knockout_points');
+		$this->db->where('Trans_type IN (1,2,12)');
+		$this->db->order_by('Trans_summ_id','asc');
+		$Sql=$this->db->get();
+		 echo "<br><br>get_cust_trans_summary_expiry Query-->".$this->db->last_query();//die;
+		if ($Sql->num_rows() > 0)
+		{
+			foreach($Sql->result() as $row)
+			{
+				$data[] = $row;
+			}
+			return $data;
+		}
+		
+			
+	}
+		function get_cust_trans_summary_expiry_monthly($Enrollement_id)
+	{
+		$last_month = date("Y-m-d",strtotime("-12 months"));
+		$From_month = date("Y-m-d",strtotime("-13 months"));
+		$Todays_date = date("Y-m-d");
+		
+		$this->db->select('T.Company_id,T.Enrollement_id,T.Card_id,First_name,Last_name,Current_balance,Blocked_points,Trans_date,SUM(Total_topup_amount+Total_loyalty_pts-Knockout_points) as Expire_pts');
+		$this->db->from('igain_transaction_summary as T');
+		$this->db->join('igain_enrollment_master as E','T.Enrollement_id=E.Enrollement_id');
+		$this->db->where(array('T.Enrollement_id'=>$Enrollement_id));
+		$this->db->where('(Total_topup_amount + Total_loyalty_pts) != Knockout_points');
+		$this->db->where('Trans_type IN (1,2,12)');
+			$this->db->where("Trans_date BETWEEN '".$From_month." 00:00:00' AND '".$last_month." 00:00:00'");
+			// $this->db->where("Trans_date BETWEEN '2023-03-01 00:00:00' AND '2023-04-01 00:00:00'");
+		$this->db->group_by('Enrollement_id');
+		$this->db->order_by('Enrollement_id','asc');
+		$Sql=$this->db->get();
+		 echo "<br><br>get_cust_trans_summary_expiry_monthly Query-->".$this->db->last_query();//die;
+		if ($Sql->num_rows() > 0)
+		{
+			foreach($Sql->result() as $row)
+			{
+				$data[] = $row;
+			}
+			return $data;
+		}
+		
+			
+	}
+		function get_cust_trans_summary_tobe_expiry_monthly($Enrollement_id)
+	{
+		$last_month = date("Y-m-d",strtotime("-11 months"));
+		$From_month = date("Y-m-d",strtotime("-12 months"));
+		$Todays_date = date("Y-m-d");
+		
+		$this->db->select('T.Company_id,T.Enrollement_id,T.Card_id,First_name,Last_name,Current_balance,Blocked_points,Trans_date,SUM(Total_topup_amount+Total_loyalty_pts-Knockout_points) as TobeExpire_pts');
+		$this->db->from('igain_transaction_summary as T');
+		$this->db->join('igain_enrollment_master as E','T.Enrollement_id=E.Enrollement_id');
+		$this->db->where(array('T.Enrollement_id'=>$Enrollement_id));
+		$this->db->where('(Total_topup_amount + Total_loyalty_pts) != Knockout_points');
+		$this->db->where('Trans_type IN (1,2,12)');
+		 $this->db->where("Trans_date BETWEEN '".$From_month." 00:00:00' AND '".$last_month." 00:00:00'");
+			// $this->db->where("Trans_date BETWEEN '2023-04-01 00:00:00' AND '2023-05-01 00:00:00'");
+		$this->db->group_by('Enrollement_id');
+		$this->db->order_by('Enrollement_id','asc');
+		$Sql=$this->db->get();
+		 echo "<br><br>get_cust_trans_summary_tobe_expiry_monthly Query-->".$this->db->last_query();//die;
+		if ($Sql->num_rows() > 0)
+		{
+			foreach($Sql->result() as $row)
+			{
+				$data[] = $row;
+			}
+			return $data;
+		}
+		
+			
+	}
+	
+	public function Update_Cust_Knockout_points_trans_summary($Trans_summ_id,$Knockout_points)
+	{
+		$Todays_date = date('Y-m-d H:i:s');
+		$this->db->where('Trans_summ_id',$Trans_summ_id);
+		$this->db->update('igain_transaction_summary',array('Knockout_points'=>$Knockout_points,'Update_date' => $Todays_date));
+		
+		echo '<br><br>'.$this->db->last_query();
+		if($this->db->affected_rows() > 0)
+		{
+			return true;
+		}
+		else
+		{
+			return 0;
+		}	
+	}
+		public function Update_cust_Redeemed_picked_flag($Trans_summ_id)
+	{
+		$Todays_date = date('Y-m-d H:i:s');
+		$this->db->where('Trans_summ_id',$Trans_summ_id);
+		$this->db->update('igain_transaction_summary',array('Redeemed_picked'=>1,'Update_date' => $Todays_date));
+		
+		echo '<br><br>'.$this->db->last_query();
+		if($this->db->affected_rows() > 0)
+		{
+			return true;
+		}
+		else
+		{
+			return 0;
+		}	
+	}
+	function get_cust_enroll_details($Company_id,$Card_id)
+	{
+		$this->db->select('First_name,Last_name,Enrollement_id,Card_id,Current_balance,Blocked_points');
+		$this->db->from('igain_enrollment_master ');
+		$this->db->where(array('Company_id'=>$Company_id,'Card_id'=>$Card_id));
+		
+		$sql=$this->db->get();
+		// echo "<br><br>Transcation Query-->".$this->db->last_query();
+		if($sql->num_rows()>0)
+		{
+			return $sql->row();
+		}
+		else
+		{
+			return false;
+		}	
+		
+			
+	}
+		function get_cust_trans_summary_custmers($Company_id)
+	{
+		$last_month = date("Y-m-d",strtotime("-11 months"));
+		$From_month = date("Y-m-d",strtotime("-13 months"));
+
+		$this->db->select('T.Enrollement_id');
+		$this->db->from('igain_transaction_summary as T');
+		$this->db->where(array('T.Company_id'=>$Company_id));
+		// $this->db->where('T.Enrollement_id IN (3162,3181,3191,3206,3246,3256,3310,3347,3437,3519,3581,3593,3601,3740,3864,3891,3914,3962,4215)');//COMMENT LATER
+		$this->db->where("Trans_date BETWEEN '".$From_month." 00:00:00' AND '".$last_month." 00:00:00'");
+		// $this->db->where("Trans_date BETWEEN '2023-03-01 00:00:00' AND '2023-04-01 00:00:00'");
+		$this->db->group_by('Enrollement_id');
+		$this->db->order_by('Enrollement_id','asc');
+		$Sql=$this->db->get();
+		 echo "<br><br>get_cust_trans_summary_custmers Query-->".$this->db->last_query();//die;
+		if ($Sql->num_rows() > 0)
+		{
+			foreach($Sql->result() as $row)
+			{
+				$data[] = $row;
+			}
+			return $data;
+		}
+		
+			
 	}
 }
 ?>
